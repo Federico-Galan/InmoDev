@@ -194,3 +194,23 @@ CREATE TABLE Pagos (
         ON UPDATE CASCADE
         ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================
+-- DATOS INICIALES
+-- =============================================
+INSERT IGNORE INTO TiposInmueble (Nombre, Descripcion, Activo) VALUES
+('Casa', 'Vivienda independiente para alquiler temporario', TRUE),
+('Departamento', 'Unidad funcional en edificio', TRUE),
+('Monoambiente', 'Unidad de un ambiente', TRUE);
+
+INSERT IGNORE INTO Propietarios (Nombre, Telefono, Email, Direccion, Activo) VALUES
+('Ana Perez', '2664000001', 'ana.perez@example.com', 'San Martin 123, San Luis', TRUE),
+('Carlos Gomez', '2664000002', 'carlos.gomez@example.com', 'Belgrano 456, Villa Mercedes', TRUE);
+
+INSERT IGNORE INTO Inquilinos (DNI, NombreCompleto, Telefono, Email, Direccion) VALUES
+('30111222', 'Lucia Fernandez', '2664000003', 'lucia.fernandez@example.com', 'Junin 789, San Luis'),
+('28333444', 'Martin Rodriguez', '2664000004', 'martin.rodriguez@example.com', 'Rivadavia 321, Merlo');
+
+INSERT IGNORE INTO Usuarios (Email, PasswordHash, Rol, Nombre, Avatar, Activo) VALUES
+('admin@inmodev.local', 'pendiente-definir-hash', 'Administrador', 'Administrador', NULL, TRUE),
+('empleado@inmodev.local', 'pendiente-definir-hash', 'Empleado', 'Empleado', NULL, TRUE);

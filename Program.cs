@@ -1,7 +1,11 @@
+using InmoDev.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IRepositorio<Propietario>, RepositorioPropietario>();
+builder.Services.AddScoped<IRepositorio<Inquilino>, RepositorioInquilino>();
 
 var app = builder.Build();
 

@@ -1,0 +1,75 @@
+@model IEnumerable<Propietario>
+
+@{
+    ViewData["Title"] = "Propietarios";
+    var pagina = ViewBag.Pagina as int? ?? 1;
+    var totalPaginas = ViewBag.TotalPaginas as int? ?? 1;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Propietarios</h1>
+    <a class="btn btn-primary" asp-action="Create">Nuevo propietario</a>
+</div>
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-success">@ViewBag.Mensaje</div>
+}
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.Telefono)</th>
+            <th>@Html.DisplayNameFor(model => model.Email)</th>
+            <th>@Html.DisplayNameFor(model => model.Direccion)</th>
+            <th>@Html.DisplayNameFor(model => model.Activo)</th>
+            <th class="text-end">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.Direccion)</td>
+                <td>@(item.Activo ? "Si" : "No")</td>
+                <td class="text-end">
+                    <div class="btn-group" role="group">
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id" title="Detalle">
+                            <i class="fa-solid fa-eye"></i>
+                        </a>
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" title="Editar">
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id" title="Eliminar">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (totalPaginas > 1)
+{
+    <nav aria-label="Paginado de propietarios">
+        <ul class="pagination">
+            <li class="page-item @(pagina <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(pagina - 1)">Anterior</a>
+            </li>
+            @for (var i = 1; i <= totalPaginas; i++)
+            {
+                <li class="page-item @(i == pagina ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+                </li>
+            }
+            <li class="page-item @(pagina >= totalPaginas ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(pagina + 1)">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+}
