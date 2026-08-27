@@ -22,7 +22,7 @@ public class Propietario
     [Required(ErrorMessage = "El email es obligatorio")]
     [EmailAddress(ErrorMessage = "Ingrese un email valido")]
     [StringLength(150, ErrorMessage = "El email no puede superar los 150 caracteres")]
-    [RegularExpression(@"^(?=[^@]*[A-Za-z])[A-Za-z0-9._%+\-]+@(gmail|hotmail)\.com$", ErrorMessage = "El email debe ser @gmail.com o @hotmail.com y no puede ser solo numerico")]
+    [RegularExpression(@"^(?=[^@]*[A-Za-z])[A-Za-z0-9._%+\-]+@(?=.*[A-Za-z])[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$", ErrorMessage = "Ingrese un email valido; no puede ser solo numerico")]
     public string Email { get; set; } = "";
 
     [Display(Name = "Direccion")]

@@ -149,9 +149,10 @@ public class PropietariosController : Controller
             return;
         }
 
-        if (emailPartes[1] is not ("gmail.com" or "hotmail.com"))
+        var dominioPartes = emailPartes[1].Split('.', StringSplitOptions.RemoveEmptyEntries);
+        if (dominioPartes.Length < 2 || !emailPartes[1].Any(char.IsLetter) || dominioPartes[^1].Length < 2 || dominioPartes[^1].Any(char.IsDigit))
         {
-            ModelState.AddModelError(nameof(Propietario.Email), "Solo se permiten emails @gmail.com o @hotmail.com.");
+            ModelState.AddModelError(nameof(Propietario.Email), "El email debe tener un dominio valido.");
         }
     }
 
