@@ -102,9 +102,9 @@ public class RepositorioPropietario : RepositorioBase, IRepositorio<Propietario>
     private static void CargarParametros(MySqlCommand command, Propietario propietario)
     {
         command.Parameters.AddWithValue("@nombre", propietario.Nombre);
-        command.Parameters.AddWithValue("@telefono", (object?)propietario.Telefono ?? DBNull.Value);
-        command.Parameters.AddWithValue("@email", (object?)propietario.Email ?? DBNull.Value);
-        command.Parameters.AddWithValue("@direccion", (object?)propietario.Direccion ?? DBNull.Value);
+        command.Parameters.AddWithValue("@telefono", propietario.Telefono);
+        command.Parameters.AddWithValue("@email", propietario.Email);
+        command.Parameters.AddWithValue("@direccion", propietario.Direccion);
         command.Parameters.AddWithValue("@activo", propietario.Activo);
     }
 
@@ -114,9 +114,9 @@ public class RepositorioPropietario : RepositorioBase, IRepositorio<Propietario>
         {
             Id = reader.GetInt32("Id"),
             Nombre = reader.GetString("Nombre"),
-            Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono")) ? null : reader.GetString("Telefono"),
-            Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString("Email"),
-            Direccion = reader.IsDBNull(reader.GetOrdinal("Direccion")) ? null : reader.GetString("Direccion"),
+            Telefono = reader.IsDBNull(reader.GetOrdinal("Telefono")) ? "" : reader.GetString("Telefono"),
+            Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? "" : reader.GetString("Email"),
+            Direccion = reader.IsDBNull(reader.GetOrdinal("Direccion")) ? "" : reader.GetString("Direccion"),
             Activo = reader.GetBoolean("Activo"),
             FechaRegistro = reader.GetDateTime("FechaRegistro")
         };

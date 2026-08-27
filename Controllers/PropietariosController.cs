@@ -1,5 +1,6 @@
 using InmoDev.Models;
 using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
 
 namespace InmoDev.Controllers;
 
@@ -51,14 +52,26 @@ public class PropietariosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Propietario propietario)
+    public IActionResult Create([Bind("Nombre,Telefono,Email,Direccion,Activo")] Propietario propietario)
     {
+        Normalizar(propietario);
+
         if (!ModelState.IsValid)
         {
             return View(propietario);
         }
 
-        repositorio.Alta(propietario);
+        try
+        {
+            repositorio.Alta(propietario);
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            logger.LogWarning(ex, "Intento de crear propietario con email duplicado: {Email}", propietario.Email);
+            ModelState.AddModelError(nameof(Propietario.Email), "Ya existe un propietario registrado con ese email.");
+            return View(propietario);
+        }
+
         TempData["Mensaje"] = "Propietario creado correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -71,19 +84,31 @@ public class PropietariosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, Propietario propietario)
+    public IActionResult Edit(int id, [Bind("Id,Nombre,Telefono,Email,Direccion,Activo")] Propietario propietario)
     {
         if (id != propietario.Id)
         {
             return BadRequest();
         }
 
+        Normalizar(propietario);
+
         if (!ModelState.IsValid)
         {
             return View(propietario);
         }
 
-        repositorio.Modificacion(propietario);
+        try
+        {
+            repositorio.Modificacion(propietario);
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            logger.LogWarning(ex, "Intento de actualizar propietario con email duplicado: {Email}", propietario.Email);
+            ModelState.AddModelError(nameof(Propietario.Email), "Ya existe un propietario registrado con ese email.");
+            return View(propietario);
+        }
+
         TempData["Mensaje"] = "Propietario actualizado correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -101,5 +126,13 @@ public class PropietariosController : Controller
         repositorio.Baja(id);
         TempData["Mensaje"] = "Propietario eliminado correctamente.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private static void Normalizar(Propietario propietario)
+    {
+        propietario.Nombre = propietario.Nombre?.Trim() ?? "";
+        propietario.Telefono = propietario.Telefono?.Trim() ?? "";
+        propietario.Email = propietario.Email?.Trim() ?? "";
+        propietario.Direccion = propietario.Direccion?.Trim() ?? "";
     }
 }

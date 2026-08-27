@@ -15,6 +15,11 @@ project.lock.json
 *.userosscache
 *.sln.docstates
 appsettings.*.local.json
+documentacion/
+NOPUSH/
+NO_SUBIR/
+*_NOPUSH/
+*_NO_SUBIR/
 
 # Build results
 [Dd]ebug/
