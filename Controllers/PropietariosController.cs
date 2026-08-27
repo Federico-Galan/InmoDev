@@ -54,9 +54,7 @@ public class PropietariosController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Create([Bind("Nombre,Telefono,Email,Direccion,Activo")] Propietario propietario)
     {
-        Normalizar(propietario);
-
-        if (!ModelState.IsValid)
+        if (!ValidarParaGuardar(propietario))
         {
             return View(propietario);
         }
@@ -91,9 +89,7 @@ public class PropietariosController : Controller
             return BadRequest();
         }
 
-        Normalizar(propietario);
-
-        if (!ModelState.IsValid)
+        if (!ValidarParaGuardar(propietario))
         {
             return View(propietario);
         }
@@ -126,6 +122,37 @@ public class PropietariosController : Controller
         repositorio.Baja(id);
         TempData["Mensaje"] = "Propietario eliminado correctamente.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private bool ValidarParaGuardar(Propietario propietario)
+    {
+        Normalizar(propietario);
+
+        ModelState.Clear();
+        TryValidateModel(propietario);
+        ValidarReglasDeSeguridad(propietario);
+
+        return ModelState.IsValid;
+    }
+
+    private void ValidarReglasDeSeguridad(Propietario propietario)
+    {
+        if (propietario.Nombre.Any(char.IsDigit) || propietario.Nombre.Any(c => !char.IsLetter(c) && !char.IsWhiteSpace(c)))
+        {
+            ModelState.AddModelError(nameof(Propietario.Nombre), "No se pueden cargar numeros ni simbolos en el nombre.");
+        }
+
+        var emailPartes = propietario.Email.Split('@');
+        if (emailPartes.Length != 2 || !emailPartes[0].Any(char.IsLetter))
+        {
+            ModelState.AddModelError(nameof(Propietario.Email), "El email no puede ser solo numerico.");
+            return;
+        }
+
+        if (emailPartes[1] is not ("gmail.com" or "hotmail.com"))
+        {
+            ModelState.AddModelError(nameof(Propietario.Email), "Solo se permiten emails @gmail.com o @hotmail.com.");
+        }
     }
 
     private static void Normalizar(Propietario propietario)
