@@ -1,0 +1,67 @@
+@model Inmueble
+
+<div class="mb-3">
+    <label asp-for="PropietarioId" class="form-label"></label>
+    <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar propietario..." data-target="PropietarioId" data-url="/Inmuebles/BuscarPropietarios" />
+    <select asp-for="PropietarioId" class="form-select" asp-items="ViewBag.Propietarios">
+        <option value="0">Seleccione un propietario</option>
+    </select>
+    <span asp-validation-for="PropietarioId" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="TipoId" class="form-label"></label>
+    <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar tipo..." data-target="TipoId" data-url="/Inmuebles/BuscarTipos" />
+    <select asp-for="TipoId" class="form-select" asp-items="ViewBag.Tipos">
+        <option value="0">Seleccione un tipo</option>
+    </select>
+    <span asp-validation-for="TipoId" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Direccion" class="form-label"></label>
+    <input asp-for="Direccion" class="form-control" placeholder="Ej: Av. Illia 455, San Luis" />
+    <span asp-validation-for="Direccion" class="text-danger"></span>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label asp-for="CupoMaximo" class="form-label"></label>
+        <input asp-for="CupoMaximo" class="form-control" min="1" />
+        <span asp-validation-for="CupoMaximo" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label asp-for="PrecioPorDia" class="form-label"></label>
+        <div class="input-group">
+            <select asp-for="MonedaPrecio" class="form-select moneda-precio-select">
+                <option value="ARS">ARS</option>
+                <option value="USD">USD</option>
+            </select>
+            <input asp-for="PrecioPorDia" class="form-control" min="0" step="0.01" />
+        </div>
+        <span asp-validation-for="MonedaPrecio" class="text-danger"></span>
+        <span asp-validation-for="PrecioPorDia" class="text-danger"></span>
+    </div>
+</div>
+<div class="mb-3">
+    <label asp-for="Coordenadas" class="form-label"></label>
+    <input asp-for="Coordenadas" class="form-control" placeholder="Ej: -40.63,-63.28" />
+    <div class="form-text">
+        En OpenStreetMap copiar los numeros de la URL con formato latitud,longitud. Ejemplo: #map=6/-40.63/-63.28 se carga como -40.63,-63.28.
+    </div>
+    <span asp-validation-for="Coordenadas" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label for="osmLink" class="form-label">Link de OpenStreetMap</label>
+    <input type="url" class="form-control" id="osmLink" placeholder="https://www.openstreetmap.org/#map=6/-40.63/-63.28" />
+    <div class="form-text">Pegue un link de OpenStreetMap o marque la ubicacion directamente en el mapa.</div>
+</div>
+<div class="mb-3">
+    <div id="mapaCoordenadas" class="mapa-coordenadas" data-coordenadas="@Model.Coordenadas"></div>
+</div>
+<div class="mb-3">
+    <label asp-for="ImagenPortada" class="form-label"></label>
+    <input asp-for="ImagenPortada" class="form-control" placeholder="Tambien puede cargarse desde Fotos" />
+    <span asp-validation-for="ImagenPortada" class="text-danger"></span>
+</div>
+<div class="form-check">
+    <input asp-for="Disponible" class="form-check-input" />
+    <label asp-for="Disponible" class="form-check-label"></label>
+</div>

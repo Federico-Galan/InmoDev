@@ -1,0 +1,238 @@
+@model Inmueble
+@{
+    ViewData["Title"] = "Fotos del inmueble";
+    var imagenes = ViewBag.Imagenes as IList<ImagenInmueble> ?? new List<ImagenInmueble>();
+}
+
+<h1 class="h3">Fotos del Inmueble: @Model.Direccion</h1>
+<hr />
+
+<div id="mensajeFotos" class="alert d-none" role="alert"></div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <h2 class="h5">Foto de Portada</h2>
+        <div class="mb-3">
+            <label class="form-label">Portada actual:</label>
+            <div id="portadaActual">
+                @if (!string.IsNullOrWhiteSpace(Model.ImagenPortada))
+                {
+                    <img src="@Model.ImagenPortada" class="img-thumbnail inmueble-portada" alt="Portada actual" />
+                    <div>
+                        <button type="button" class="btn btn-danger btn-sm mt-2" id="btnEliminarPortada">
+                            <i class="fa-solid fa-trash-can"></i> Eliminar
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No hay portada cargada.</p>
+                }
+            </div>
+        </div>
+
+        <form id="formPortada" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label for="imagenPortada" class="form-label">Seleccionar imagen</label>
+                <input type="file" class="form-control" id="imagenPortada" name="imagen" accept=".jpg,.jpeg,.png,.webp" required />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-upload"></i> Subir
+            </button>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <h2 class="h5">Imagenes del Interior</h2>
+        <div class="mb-3">
+            <label class="form-label">Imagenes actuales:</label>
+            <div class="d-flex flex-wrap gap-2" id="galeriaActual">
+                @if (imagenes.Count > 0)
+                {
+                    foreach (var imagen in imagenes)
+                    {
+                        <div class="imagen-con-hover" data-imagen-id="@imagen.Id">
+                            <img src="@imagen.Url" class="img-thumbnail inmueble-miniatura" alt="Imagen interior" />
+                            <button type="button" class="btn btn-danger btn-sm btn-eliminar-imagen" title="Eliminar imagen" data-imagen-id="@imagen.Id">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No hay imagenes interiores disponibles.</p>
+                }
+            </div>
+        </div>
+
+        <form id="formInterior" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label for="imagenes" class="form-label">Seleccionar imagenes</label>
+                <input type="file" class="form-control" id="imagenes" name="imagenes" accept=".jpg,.jpeg,.png,.webp" multiple required />
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="fa-solid fa-upload"></i> Subir
+            </button>
+        </form>
+
+        <div class="mt-3">
+            <h3 class="h6">Previsualizacion:</h3>
+            <div id="preview" class="d-flex flex-wrap gap-2"></div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a class="btn btn-secondary" asp-action="Index">Volver</a>
+</div>
+
+@section Scripts {
+    <script>
+        const inmuebleId = @Model.Id;
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        const mensaje = document.getElementById('mensajeFotos');
+        const galeria = document.getElementById('galeriaActual');
+        const preview = document.getElementById('preview');
+
+        function mostrarMensaje(texto, esError) {
+            mensaje.textContent = texto;
+            mensaje.classList.remove('d-none', 'alert-success', 'alert-danger');
+            mensaje.classList.add(esError ? 'alert-danger' : 'alert-success');
+        }
+
+        function limpiarMensaje() {
+            mensaje.classList.add('d-none');
+            mensaje.textContent = '';
+        }
+
+        function renderGaleria(imagenes) {
+            galeria.innerHTML = '';
+            if (!imagenes || imagenes.length === 0) {
+                galeria.innerHTML = '<p class="text-muted mb-0">No hay imagenes interiores disponibles.</p>';
+                return;
+            }
+
+            imagenes.forEach(imagen => {
+                const item = document.createElement('div');
+                item.className = 'imagen-con-hover';
+                item.dataset.imagenId = imagen.id;
+                item.innerHTML = `
+                    <img src="${imagen.url}" class="img-thumbnail inmueble-miniatura" alt="Imagen interior" />
+                    <button type="button" class="btn btn-danger btn-sm btn-eliminar-imagen" title="Eliminar imagen" data-imagen-id="${imagen.id}">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>`;
+                galeria.appendChild(item);
+            });
+        }
+
+        function renderPortada(url) {
+            const contenedor = document.getElementById('portadaActual');
+            if (!url) {
+                contenedor.innerHTML = '<p class="text-muted">No hay portada cargada.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = `
+                <img src="${url}" class="img-thumbnail inmueble-portada" alt="Portada actual" />
+                <div>
+                    <button type="button" class="btn btn-danger btn-sm mt-2" id="btnEliminarPortada">
+                        <i class="fa-solid fa-trash-can"></i> Eliminar
+                    </button>
+                </div>`;
+        }
+
+        async function enviarFormulario(url, formData) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token },
+                body: formData
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.mensaje || 'No se pudo completar la operacion.');
+            }
+            return data;
+        }
+
+        document.getElementById('formPortada').addEventListener('submit', async event => {
+            event.preventDefault();
+            limpiarMensaje();
+            const form = event.currentTarget;
+            try {
+                const formData = new FormData(form);
+                const data = await enviarFormulario(`/Inmuebles/SubirPortada/${inmuebleId}`, formData);
+                renderPortada(data.url);
+                form.reset();
+                mostrarMensaje(data.mensaje, false);
+            } catch (error) {
+                mostrarMensaje(error.message, true);
+            }
+        });
+
+        document.getElementById('formInterior').addEventListener('submit', async event => {
+            event.preventDefault();
+            limpiarMensaje();
+            const form = event.currentTarget;
+            try {
+                const formData = new FormData(form);
+                const data = await enviarFormulario(`/Inmuebles/SubirImagenes/${inmuebleId}`, formData);
+                renderGaleria(data.imagenes);
+                form.reset();
+                preview.innerHTML = '';
+                mostrarMensaje(data.mensaje, false);
+            } catch (error) {
+                mostrarMensaje(error.message, true);
+            }
+        });
+
+        document.getElementById('imagenes').addEventListener('change', event => {
+            preview.innerHTML = '';
+            Array.from(event.target.files || []).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'img-thumbnail inmueble-miniatura';
+                    img.alt = 'Previsualizacion';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        document.addEventListener('click', async event => {
+            const botonImagen = event.target.closest('.btn-eliminar-imagen');
+            if (botonImagen) {
+                limpiarMensaje();
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                try {
+                    const data = await enviarFormulario(`/Inmuebles/EliminarImagen/${botonImagen.dataset.imagenId}`, formData);
+                    renderGaleria(data.imagenes);
+                    mostrarMensaje(data.mensaje, false);
+                } catch (error) {
+                    mostrarMensaje(error.message, true);
+                }
+                return;
+            }
+
+            const botonPortada = event.target.closest('#btnEliminarPortada');
+            if (botonPortada) {
+                limpiarMensaje();
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+                try {
+                    const data = await enviarFormulario(`/Inmuebles/EliminarPortada/${inmuebleId}`, formData);
+                    renderPortada(null);
+                    mostrarMensaje(data.mensaje, false);
+                } catch (error) {
+                    mostrarMensaje(error.message, true);
+                }
+            }
+        });
+    </script>
+}

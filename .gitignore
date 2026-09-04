@@ -15,6 +15,7 @@ project.lock.json
 *.userosscache
 *.sln.docstates
 appsettings.*.local.json
+wwwroot/uploads/
 documentacion/
 NOPUSH/
 NO_SUBIR/

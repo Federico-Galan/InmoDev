@@ -70,6 +70,7 @@ CREATE TABLE Inmueble (
     CupoMaximo INT UNSIGNED NULL,
     Coordenadas VARCHAR(255) NULL,
     PrecioPorDia DECIMAL(12,2) NOT NULL,
+    MonedaPrecio VARCHAR(3) NOT NULL DEFAULT 'ARS',
     ImagenPortada VARCHAR(255) NULL,
     Disponible BOOLEAN NOT NULL DEFAULT TRUE,
     FechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -77,6 +78,7 @@ CREATE TABLE Inmueble (
     KEY IX_Inmueble_TipoId (TipoId),
     CONSTRAINT CHK_Inmueble_CupoMaximo CHECK (CupoMaximo IS NULL OR CupoMaximo > 0),
     CONSTRAINT CHK_Inmueble_PrecioPorDia CHECK (PrecioPorDia >= 0),
+    CONSTRAINT CHK_Inmueble_MonedaPrecio CHECK (MonedaPrecio IN ('ARS', 'USD')),
     CONSTRAINT FK_Inmueble_Propietario
         FOREIGN KEY (PropietarioId)
         REFERENCES Propietarios(Id)
@@ -214,3 +216,15 @@ INSERT IGNORE INTO Inquilinos (DNI, NombreCompleto, Telefono, Email, Direccion) 
 INSERT IGNORE INTO Usuarios (Email, PasswordHash, Rol, Nombre, Avatar, Activo) VALUES
 ('admin@inmodev.local', 'pendiente-definir-hash', 'Administrador', 'Administrador', NULL, TRUE),
 ('empleado@inmodev.local', 'pendiente-definir-hash', 'Empleado', 'Empleado', NULL, TRUE);
+
+INSERT INTO Inmueble (PropietarioId, TipoId, Direccion, CupoMaximo, Coordenadas, PrecioPorDia, MonedaPrecio, ImagenPortada, Disponible)
+SELECT 1, 1, 'Av. Illia 455, San Luis', 6, '-33.3022,-66.3368', 45000.00, 'ARS', NULL, TRUE
+WHERE NOT EXISTS (SELECT 1 FROM Inmueble WHERE Direccion = 'Av. Illia 455, San Luis');
+
+INSERT INTO Inmueble (PropietarioId, TipoId, Direccion, CupoMaximo, Coordenadas, PrecioPorDia, MonedaPrecio, ImagenPortada, Disponible)
+SELECT 1, 2, 'Junin 1240, San Luis', 4, '-33.3011,-66.3375', 32000.00, 'ARS', NULL, TRUE
+WHERE NOT EXISTS (SELECT 1 FROM Inmueble WHERE Direccion = 'Junin 1240, San Luis');
+
+INSERT INTO Inmueble (PropietarioId, TipoId, Direccion, CupoMaximo, Coordenadas, PrecioPorDia, MonedaPrecio, ImagenPortada, Disponible)
+SELECT 2, 3, 'Calle Falsa 123, Villa Mercedes', 2, '-33.6757,-65.4578', 25000.00, 'ARS', NULL, FALSE
+WHERE NOT EXISTS (SELECT 1 FROM Inmueble WHERE Direccion = 'Calle Falsa 123, Villa Mercedes');

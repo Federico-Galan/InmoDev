@@ -7,12 +7,17 @@ InmoDev es un sistema web MVC para una agencia inmobiliaria que gestiona alquile
 - Juan Esteban Carreras - carrerasjuanesteban@gmail.com - https://github.com/CarrerasJuan
 - Federico Galan - federico.galan2023@gmail.com - https://github.com/Federico-Galan
 
-## Primera entrega
+## Entregas
 
-Para esta entrega se implementa el ABM de:
+Primera entrega:
 
 - Propietarios
 - Inquilinos
+
+Segunda entrega:
+
+- Inmuebles
+- Vista de fotos de inmuebles con carga AJAX de imagenes interiores
 
 ## Tecnologias
 
