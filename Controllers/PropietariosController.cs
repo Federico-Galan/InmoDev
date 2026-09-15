@@ -142,6 +142,11 @@ public class PropietariosController : Controller
             ModelState.AddModelError(nameof(Propietario.Nombre), "No se pueden cargar numeros ni simbolos en el nombre.");
         }
 
+        if (string.IsNullOrWhiteSpace(propietario.Email))
+        {
+            return;
+        }
+
         var emailPartes = propietario.Email.Split('@');
         if (emailPartes.Length != 2 || !emailPartes[0].Any(char.IsLetter))
         {
@@ -160,7 +165,7 @@ public class PropietariosController : Controller
     {
         propietario.Nombre = propietario.Nombre?.Trim() ?? "";
         propietario.Telefono = propietario.Telefono?.Trim() ?? "";
-        propietario.Email = propietario.Email?.Trim().ToLowerInvariant() ?? "";
+        propietario.Email = string.IsNullOrWhiteSpace(propietario.Email) ? null : propietario.Email.Trim().ToLowerInvariant();
         propietario.Direccion = propietario.Direccion?.Trim() ?? "";
     }
 }

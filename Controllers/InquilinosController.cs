@@ -1,5 +1,6 @@
 using InmoDev.Models;
 using Microsoft.AspNetCore.Mvc;
+using MySqlConnector;
 
 namespace InmoDev.Controllers;
 
@@ -51,14 +52,25 @@ public class InquilinosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Inquilino inquilino)
+    public IActionResult Create([Bind("DNI,NombreCompleto,Telefono,Email,Direccion")] Inquilino inquilino)
     {
+        Normalizar(inquilino);
         if (!ModelState.IsValid)
         {
             return View(inquilino);
         }
 
-        repositorio.Alta(inquilino);
+        try
+        {
+            repositorio.Alta(inquilino);
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            logger.LogWarning(ex, "Intento de crear inquilino duplicado: {DNI} / {Email}", inquilino.DNI, inquilino.Email);
+            AgregarErrorDuplicado(ex);
+            return View(inquilino);
+        }
+
         TempData["Mensaje"] = "Inquilino creado correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -71,19 +83,30 @@ public class InquilinosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, Inquilino inquilino)
+    public IActionResult Edit(int id, [Bind("Id,DNI,NombreCompleto,Telefono,Email,Direccion")] Inquilino inquilino)
     {
         if (id != inquilino.Id)
         {
             return BadRequest();
         }
 
+        Normalizar(inquilino);
         if (!ModelState.IsValid)
         {
             return View(inquilino);
         }
 
-        repositorio.Modificacion(inquilino);
+        try
+        {
+            repositorio.Modificacion(inquilino);
+        }
+        catch (MySqlException ex) when (ex.Number == 1062)
+        {
+            logger.LogWarning(ex, "Intento de actualizar inquilino duplicado: {DNI} / {Email}", inquilino.DNI, inquilino.Email);
+            AgregarErrorDuplicado(ex);
+            return View(inquilino);
+        }
+
         TempData["Mensaje"] = "Inquilino actualizado correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -101,5 +124,31 @@ public class InquilinosController : Controller
         repositorio.Baja(id);
         TempData["Mensaje"] = "Inquilino eliminado correctamente.";
         return RedirectToAction(nameof(Index));
+    }
+
+    private void AgregarErrorDuplicado(MySqlException ex)
+    {
+        if (ex.Message.Contains("UQ_Inquilinos_DNI", StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(Inquilino.DNI), "Ya existe un inquilino registrado con ese DNI.");
+            return;
+        }
+
+        if (ex.Message.Contains("UQ_Inquilinos_Email", StringComparison.OrdinalIgnoreCase))
+        {
+            ModelState.AddModelError(nameof(Inquilino.Email), "Ya existe un inquilino registrado con ese email.");
+            return;
+        }
+
+        ModelState.AddModelError(string.Empty, "Ya existe un inquilino registrado con esos datos.");
+    }
+
+    private static void Normalizar(Inquilino inquilino)
+    {
+        inquilino.DNI = inquilino.DNI?.Trim() ?? "";
+        inquilino.NombreCompleto = inquilino.NombreCompleto?.Trim() ?? "";
+        inquilino.Telefono = string.IsNullOrWhiteSpace(inquilino.Telefono) ? null : inquilino.Telefono.Trim();
+        inquilino.Email = string.IsNullOrWhiteSpace(inquilino.Email) ? null : inquilino.Email.Trim().ToLowerInvariant();
+        inquilino.Direccion = string.IsNullOrWhiteSpace(inquilino.Direccion) ? null : inquilino.Direccion.Trim();
     }
 }

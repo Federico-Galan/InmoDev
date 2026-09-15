@@ -19,11 +19,10 @@ public class Propietario
     [RegularExpression(@"^[0-9+\-\s()]{6,50}$", ErrorMessage = "Ingrese un telefono valido")]
     public string Telefono { get; set; } = "";
 
-    [Required(ErrorMessage = "El email es obligatorio")]
     [EmailAddress(ErrorMessage = "Ingrese un email valido")]
     [StringLength(150, ErrorMessage = "El email no puede superar los 150 caracteres")]
     [RegularExpression(@"^(?=[^@]*[A-Za-z])[A-Za-z0-9._%+\-]+@(?=.*[A-Za-z])[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)*\.[A-Za-z]{2,}$", ErrorMessage = "Ingrese un email valido; no puede ser solo numerico")]
-    public string Email { get; set; } = "";
+    public string? Email { get; set; }
 
     [Display(Name = "Direccion")]
     [Required(ErrorMessage = "La direccion es obligatoria")]
