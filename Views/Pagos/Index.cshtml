@@ -1,0 +1,140 @@
+﻿@model IEnumerable<Pago>
+@{
+    ViewData["Title"] = "Historial General de Pagos";
+    var pagina = ViewBag.Pagina as int? ?? 1;
+    var totalPaginas = ViewBag.TotalPaginas as int? ?? 1;
+    var estado = ViewBag.Estado as string;
+    var reservaId = ViewBag.ReservaId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-0">Listado de Pagos</h1>
+        <p class="text-muted small mb-0">Control de transacciones y pagos de alquileres</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="fa-solid fa-plus me-1"></i> Registrar Pago</a>
+</div>
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-info">@ViewBag.Mensaje</div>
+}
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">N° Reserva</label>
+                <input type="number" name="reservaId" value="@reservaId" class="form-control form-control-sm" placeholder="ID de reserva..." />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold">Estado</label>
+                <select name="estado" class="form-select form-select-sm">
+                    <option value="">-- Todos --</option>
+                    <option value="Activo" selected="@(estado == "Activo")">Activo</option>
+                    <option value="Anulado" selected="@(estado == "Anulado")">Anulado</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary flex-grow-1"><i class="fa-solid fa-filter me-1"></i> Filtrar</button>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>N° Pago</th>
+                <th>Reserva</th>
+                <th>Concepto</th>
+                <th>Fecha de Pago</th>
+                <th>Importe</th>
+                <th>Estado</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No se registraron pagos con los filtros seleccionados.</td>
+                </tr>
+            }
+            @foreach (var item in Model)
+            {
+                <tr class="@(item.Estado == "Anulado" ? "table-light text-muted" : "")">
+                    <td class="fw-bold">#@item.Id</td>
+                    <td>
+                        <a asp-action="PorReserva" asp-route-reservaId="@item.ReservaId" class="text-decoration-none fw-semibold">
+                            Reserva #@item.ReservaId
+                        </a>
+                        <div class="small text-muted">@item.InmuebleDireccion (@item.InquilinoNombre)</div>
+                    </td>
+                    <td>@item.Concepto</td>
+                    <td>@item.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        <span class="fw-bold @(item.Estado == "Anulado" ? "text-decoration-line-through text-danger" : "text-success")">
+                            @item.MonedaPrecio @item.Importe.ToString("N2")
+                        </span>
+                    </td>
+                    <td>
+                        @if (item.Estado == "Activo")
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Anulado</span>
+                        }
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group" role="group">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@item.Id" title="Detalle">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            @if (item.Estado == "Activo")
+                            {
+                                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" title="Editar Concepto">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <form asp-action="Anular" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('¿Está seguro de anular este pago?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Pagos")" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Anular Pago">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </button>
+                                    </form>
+                                }
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (totalPaginas > 1)
+{
+    <nav aria-label="Paginado de pagos">
+        <ul class="pagination">
+            <li class="page-item @(pagina <= 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(pagina - 1)" asp-route-reservaId="@reservaId" asp-route-estado="@estado">Anterior</a>
+            </li>
+            @for (var i = 1; i <= totalPaginas; i++)
+            {
+                <li class="page-item @(i == pagina ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-reservaId="@reservaId" asp-route-estado="@estado">@i</a>
+                </li>
+            }
+            <li class="page-item @(pagina >= totalPaginas ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@(pagina + 1)" asp-route-reservaId="@reservaId" asp-route-estado="@estado">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+}

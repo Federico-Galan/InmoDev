@@ -1,0 +1,56 @@
+﻿@model Pago
+@{
+    ViewData["Title"] = "Registrar Pago";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h1 class="h4 mb-0"><i class="fa-solid fa-hand-holding-dollar text-success me-2"></i>Registrar Pago</h1>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ReservaId" class="form-label fw-semibold"></label>
+                        <select asp-for="ReservaId" class="form-select" asp-items="ViewBag.Reservas">
+                            <option value="0">-- Seleccione una reserva --</option>
+                        </select>
+                        <span asp-validation-for="ReservaId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Concepto" class="form-label fw-semibold"></label>
+                        <input asp-for="Concepto" class="form-control" placeholder="Ej: Seña inicial 20%, Pago total, Cuota..." />
+                        <span asp-validation-for="Concepto" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaPago" class="form-label fw-semibold"></label>
+                            <input asp-for="FechaPago" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="FechaPago" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Importe" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Importe" class="form-control" step="0.01" min="0.01" />
+                            </div>
+                            <span asp-validation-for="Importe" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
+                        <button type="submit" class="btn btn-success"><i class="fa-solid fa-check me-1"></i> Confirmar y Registrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -38,6 +38,10 @@ public class Inmueble
     [RegularExpression("^(ARS|USD)$", ErrorMessage = "Seleccione una moneda valida")]
     public string MonedaPrecio { get; set; } = "ARS";
 
+    [Display(Name = "Porcentaje de reserva (%)")]
+    [Range(0, 100, ErrorMessage = "El porcentaje debe estar entre 0 y 100")]
+    public decimal PorcentajeReserva { get; set; } = 20;
+
     [Display(Name = "Imagen de portada")]
     [StringLength(255, ErrorMessage = "La imagen de portada no puede superar los 255 caracteres")]
     public string? ImagenPortada { get; set; }

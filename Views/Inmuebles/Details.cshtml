@@ -20,6 +20,8 @@
     <dd class="col-sm-9">@Html.DisplayFor(model => model.Coordenadas)</dd>
     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioPorDia)</dt>
     <dd class="col-sm-9">@Model.MonedaPrecio @Model.PrecioPorDia.ToString("N2")</dd>
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PorcentajeReserva)</dt>
+    <dd class="col-sm-9">@Model.PorcentajeReserva.ToString("N0")%</dd>
     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ImagenPortada)</dt>
     <dd class="col-sm-9">
         @if (!string.IsNullOrWhiteSpace(Model.ImagenPortada))

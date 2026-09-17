@@ -1,0 +1,100 @@
+﻿@model IEnumerable<Inmueble>
+@{
+    ViewData["Title"] = "Buscar Inmuebles Disponibles";
+    var fechaInicio = ViewBag.FechaInicio as string;
+    var fechaFin = ViewBag.FechaFin as string;
+    var cupoMinimo = ViewBag.CupoMinimo as int?;
+    var precioMaximo = ViewBag.PrecioMaximo as decimal?;
+    var moneda = ViewBag.Moneda as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-0">Buscar Inmuebles Disponibles</h1>
+        <p class="text-muted small mb-0">Encuentre propiedades desocupadas para el rango de fechas solicitado</p>
+    </div>
+    <a class="btn btn-secondary" asp-action="Index"><i class="fa-solid fa-arrow-left me-1"></i> Volver a Reservas</a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Fecha Desde (*)</label>
+                <input type="date" name="fechaInicio" value="@fechaInicio" class="form-control" required />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Fecha Hasta (*)</label>
+                <input type="date" name="fechaFin" value="@fechaFin" class="form-control" required />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Tipo de Inmueble</label>
+                <select name="tipoId" class="form-select" asp-items="ViewBag.Tipos">
+                    <option value="">-- Todos --</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Cupo Mínimo</label>
+                <input type="number" name="cupoMinimo" value="@cupoMinimo" min="1" class="form-control" placeholder="Pers." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Precio Máx./día</label>
+                <input type="number" name="precioMaximo" value="@precioMaximo" min="0" step="1000" class="form-control" placeholder="$ Máx" />
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2">
+                <a asp-action="BuscarDisponibles" class="btn btn-outline-secondary">Limpiar Filtros</a>
+                <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-magnifying-glass me-1"></i> Consultar Disponibilidad</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    @if (!Model.Any())
+    {
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3"></i>
+            <h5>No hay inmuebles disponibles para las fechas y criterios seleccionados.</h5>
+            <p class="text-muted">Pruebe cambiando el rango de fechas o flexibilizando los filtros.</p>
+        </div>
+    }
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                @if (!string.IsNullOrWhiteSpace(item.ImagenPortada))
+                {
+                    <img src="@item.ImagenPortada" class="card-img-top" alt="Portada" style="height: 180px; object-fit: cover;" />
+                }
+                else
+                {
+                    <div class="bg-light text-muted d-flex align-items-center justify-content-center" style="height: 180px;">
+                        <i class="fa-solid fa-image fa-3x opacity-50"></i>
+                    </div>
+                }
+                <div class="card-body">
+                    <span class="badge bg-primary mb-2">@item.TipoNombre</span>
+                    <h5 class="card-title fw-bold mb-1">@item.Direccion</h5>
+                    <p class="card-text text-muted small mb-2"><i class="fa-solid fa-user me-1"></i> Propietario: @item.PropietarioNombre</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
+                        <div>
+                            <div class="text-muted small">Precio por día</div>
+                            <div class="h5 fw-bold text-success mb-0">@item.MonedaPrecio @item.PrecioPorDia.ToString("N2")</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-muted small">Cupo</div>
+                            <span class="badge bg-light text-dark border"><i class="fa-solid fa-users me-1"></i> @(item.CupoMaximo ?? 1) pers.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 pt-0 pb-3">
+                    <a class="btn btn-success w-100" asp-action="Create" asp-route-inmuebleId="@item.Id" asp-route-fechaInicio="@fechaInicio" asp-route-fechaFin="@fechaFin">
+                        <i class="fa-solid fa-calendar-check me-1"></i> Reservar este Inmueble
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

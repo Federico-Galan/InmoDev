@@ -12,8 +12,8 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
     {
         using var connection = new MySqlConnection(connectionString);
         var sql = """
-            INSERT INTO Inmueble (PropietarioId, TipoId, Direccion, CupoMaximo, Coordenadas, PrecioPorDia, MonedaPrecio, ImagenPortada, Disponible)
-            VALUES (@propietarioId, @tipoId, @direccion, @cupoMaximo, @coordenadas, @precioPorDia, @monedaPrecio, @imagenPortada, @disponible);
+            INSERT INTO Inmueble (PropietarioId, TipoId, Direccion, CupoMaximo, Coordenadas, PrecioPorDia, MonedaPrecio, PorcentajeReserva, ImagenPortada, Disponible)
+            VALUES (@propietarioId, @tipoId, @direccion, @cupoMaximo, @coordenadas, @precioPorDia, @monedaPrecio, @porcentajeReserva, @imagenPortada, @disponible);
             SELECT LAST_INSERT_ID();
             """;
         using var command = new MySqlCommand(sql, connection);
@@ -46,6 +46,7 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
                 Coordenadas = @coordenadas,
                 PrecioPorDia = @precioPorDia,
                 MonedaPrecio = @monedaPrecio,
+                PorcentajeReserva = @porcentajeReserva,
                 ImagenPortada = @imagenPortada,
                 Disponible = @disponible
             WHERE Id = @id
@@ -63,7 +64,7 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
         using var connection = new MySqlConnection(connectionString);
         var sql = """
             SELECT i.Id, i.PropietarioId, i.TipoId, i.Direccion, i.CupoMaximo, i.Coordenadas,
-                   i.PrecioPorDia, i.MonedaPrecio, i.ImagenPortada, i.Disponible, i.FechaRegistro,
+                   i.PrecioPorDia, i.MonedaPrecio, i.PorcentajeReserva, i.ImagenPortada, i.Disponible, i.FechaRegistro,
                    p.Nombre AS PropietarioNombre, t.Nombre AS TipoNombre
             FROM Inmueble i
             INNER JOIN Propietarios p ON p.Id = i.PropietarioId
@@ -97,7 +98,7 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
         using var connection = new MySqlConnection(connectionString);
         var sql = """
             SELECT i.Id, i.PropietarioId, i.TipoId, i.Direccion, i.CupoMaximo, i.Coordenadas,
-                   i.PrecioPorDia, i.MonedaPrecio, i.ImagenPortada, i.Disponible, i.FechaRegistro,
+                   i.PrecioPorDia, i.MonedaPrecio, i.PorcentajeReserva, i.ImagenPortada, i.Disponible, i.FechaRegistro,
                    p.Nombre AS PropietarioNombre, t.Nombre AS TipoNombre
             FROM Inmueble i
             INNER JOIN Propietarios p ON p.Id = i.PropietarioId
@@ -122,6 +123,17 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
         return command.ExecuteNonQuery();
     }
 
+    public int CambiarDisponibilidad(int id, bool disponible)
+    {
+        using var connection = new MySqlConnection(connectionString);
+        const string sql = "UPDATE Inmueble SET Disponible = @disponible WHERE Id = @id";
+        using var command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@id", id);
+        command.Parameters.AddWithValue("@disponible", disponible);
+        connection.Open();
+        return command.ExecuteNonQuery();
+    }
+
     public IList<OpcionSelect> ObtenerPropietarios(string? busqueda = null, int limite = 25)
     {
         return ObtenerOpciones("""
@@ -140,6 +152,17 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
             FROM TiposInmueble
             WHERE Activo = TRUE AND (@busqueda IS NULL OR Nombre LIKE CONCAT('%', @busqueda, '%'))
             ORDER BY Nombre
+            LIMIT @limite
+            """, busqueda, limite);
+    }
+
+    public IList<OpcionSelect> ObtenerInmueblesSelect(string? busqueda = null, int limite = 25)
+    {
+        return ObtenerOpciones("""
+            SELECT Id, CONCAT(Direccion, ' (', MonedaPrecio, ' $', PrecioPorDia, '/dia)') AS Texto
+            FROM Inmueble
+            WHERE (@busqueda IS NULL OR Direccion LIKE CONCAT('%', @busqueda, '%'))
+            ORDER BY Direccion
             LIMIT @limite
             """, busqueda, limite);
     }
@@ -173,6 +196,7 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
         command.Parameters.AddWithValue("@coordenadas", (object?)inmueble.Coordenadas ?? DBNull.Value);
         command.Parameters.AddWithValue("@precioPorDia", inmueble.PrecioPorDia);
         command.Parameters.AddWithValue("@monedaPrecio", inmueble.MonedaPrecio);
+        command.Parameters.AddWithValue("@porcentajeReserva", inmueble.PorcentajeReserva);
         command.Parameters.AddWithValue("@imagenPortada", (object?)inmueble.ImagenPortada ?? DBNull.Value);
         command.Parameters.AddWithValue("@disponible", inmueble.Disponible);
     }
@@ -189,6 +213,7 @@ public class RepositorioInmueble : RepositorioBase, IRepositorio<Inmueble>
             Coordenadas = reader.IsDBNull(reader.GetOrdinal("Coordenadas")) ? null : reader.GetString("Coordenadas"),
             PrecioPorDia = reader.GetDecimal("PrecioPorDia"),
             MonedaPrecio = reader.GetString("MonedaPrecio"),
+            PorcentajeReserva = reader.GetDecimal("PorcentajeReserva"),
             ImagenPortada = reader.IsDBNull(reader.GetOrdinal("ImagenPortada")) ? null : reader.GetString("ImagenPortada"),
             Disponible = reader.GetBoolean("Disponible"),
             FechaRegistro = reader.GetDateTime("FechaRegistro"),

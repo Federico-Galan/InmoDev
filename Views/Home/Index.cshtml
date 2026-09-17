@@ -1,13 +1,126 @@
-﻿@{
-    ViewData["Title"] = "Inicio";
+@{
+    ViewData["Title"] = "Panel Principal";
 }
 
-<div class="py-4">
-    <h1 class="display-6">InmoDev</h1>
-    <p class="lead">Sistema de gestion de alquileres temporales.</p>
-    <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-primary" asp-controller="Propietarios" asp-action="Index">Administrar propietarios</a>
-        <a class="btn btn-outline-primary" asp-controller="Inquilinos" asp-action="Index">Administrar inquilinos</a>
-        <a class="btn btn-outline-primary" asp-controller="Inmuebles" asp-action="Index">Administrar inmuebles</a>
+<div class="py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h1 class="h2 fw-bold mb-0 text-primary"><i class="fa-solid fa-house-laptop me-2"></i>InmoDev</h1>
+            <p class="text-muted mb-0">Sistema Integral de Gestión de Alquileres Temporarios</p>
+        </div>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="text-end">
+                <span class="text-muted small">Bienvenido/a,</span>
+                <div class="fw-bold">@User.Identity.Name</div>
+            </div>
+        }
     </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 bg-primary bg-opacity-10 border-start border-primary border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title fw-bold text-primary mb-0">Reservas</h5>
+                            <i class="fa-solid fa-calendar-check fa-2x text-primary"></i>
+                        </div>
+                        <p class="card-text text-muted small">Consulte disponibilidad de inmuebles, gestione contratos vigentes y finalizaciones.</p>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-primary" asp-controller="Reservas" asp-action="Index">Ver Reservas</a>
+                            <a class="btn btn-sm btn-outline-primary" asp-controller="Reservas" asp-action="BuscarDisponibles">Consultar Fechas</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 bg-success bg-opacity-10 border-start border-success border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title fw-bold text-success mb-0">Pagos y Caja</h5>
+                            <i class="fa-solid fa-money-bill-wave fa-2x text-success"></i>
+                        </div>
+                        <p class="card-text text-muted small">Registre señas, pagos totales, controle saldos y consulte el historial de transacciones.</p>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-success" asp-controller="Pagos" asp-action="Index">Historial de Pagos</a>
+                            <a class="btn btn-sm btn-outline-success" asp-controller="Pagos" asp-action="Create">Cargar Pago</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 bg-info bg-opacity-10 border-start border-info border-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title fw-bold text-dark mb-0">Inmuebles</h5>
+                            <i class="fa-solid fa-building fa-2x text-info"></i>
+                        </div>
+                        <p class="card-text text-muted small">Administre propiedades, fotos, coordenadas, tarifas diarias y porcentajes de seña.</p>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-info text-white" asp-controller="Inmuebles" asp-action="Index">Ver Inmuebles</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="Inmuebles" asp-action="Create">Nuevo Inmueble</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-users fa-lg text-primary me-2"></i>
+                            <h6 class="fw-bold mb-0">Inquilinos</h6>
+                        </div>
+                        <p class="small text-muted mb-3">Padrón de inquilinos, datos personales y de contacto.</p>
+                        <a class="btn btn-sm btn-outline-primary w-100" asp-controller="Inquilinos" asp-action="Index">Gestionar Inquilinos</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-user-tie fa-lg text-secondary me-2"></i>
+                            <h6 class="fw-bold mb-0">Propietarios</h6>
+                        </div>
+                        <p class="small text-muted mb-3">Gestión de dueños de propiedades asociadas.</p>
+                        <a class="btn btn-sm btn-outline-secondary w-100" asp-controller="Propietarios" asp-action="Index">Gestionar Propietarios</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-tags fa-lg text-warning me-2"></i>
+                            <h6 class="fw-bold mb-0">Tipos de Inmueble</h6>
+                        </div>
+                        <p class="small text-muted mb-3">Categorías de propiedades (Casas, Dptos, Lofts, etc.).</p>
+                        <a class="btn btn-sm btn-outline-warning text-dark w-100" asp-controller="TiposInmueble" asp-action="Index">Gestionar Tipos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 p-5 text-center bg-light">
+            <i class="fa-solid fa-lock fa-3x text-muted mb-3"></i>
+            <h3>Acceso al Sistema</h3>
+            <p class="text-muted">Por favor inicie sesión para acceder a las reservas, pagos e inmuebles.</p>
+            <div class="mt-2">
+                <a class="btn btn-primary px-4 py-2" asp-controller="Usuarios" asp-action="Login">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    }
 </div>

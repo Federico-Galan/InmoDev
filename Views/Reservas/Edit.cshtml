@@ -1,0 +1,80 @@
+﻿@model Reserva
+@{
+    ViewData["Title"] = "Editar Reserva #" + Model.Id;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h1 class="h4 mb-0">Editar Reserva #@Model.Id</h1>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="UsuarioCreadoId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="InquilinoId" class="form-label fw-semibold"></label>
+                            <select asp-for="InquilinoId" class="form-select" asp-items="ViewBag.Inquilinos"></select>
+                            <span asp-validation-for="InquilinoId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="InmuebleId" class="form-label fw-semibold"></label>
+                            <select asp-for="InmuebleId" class="form-select" asp-items="ViewBag.Inmuebles"></select>
+                            <span asp-validation-for="InmuebleId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaInicio" class="form-label fw-semibold"></label>
+                            <input asp-for="FechaInicio" type="date" class="form-control" />
+                            <span asp-validation-for="FechaInicio" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaFin" class="form-label fw-semibold"></label>
+                            <input asp-for="FechaFin" type="date" class="form-control" />
+                            <span asp-validation-for="FechaFin" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MontoPorDia" class="form-label fw-semibold"></label>
+                            <input asp-for="MontoPorDia" class="form-control" step="0.01" min="0.01" />
+                            <span asp-validation-for="MontoPorDia" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="PorcentajeSena" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <input asp-for="PorcentajeSena" class="form-control" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Estado" class="form-label fw-semibold"></label>
+                            <select asp-for="Estado" class="form-select">
+                                <option value="Vigente">Vigente</option>
+                                <option value="Finalizada">Finalizada</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Id">Volver</a>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-1"></i> Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,10 +1,12 @@
 using InmoDev.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MySqlConnector;
 
 namespace InmoDev.Controllers;
 
+[Authorize]
 public class InmueblesController : Controller
 {
     private readonly RepositorioInmueble repositorio;
@@ -54,7 +56,7 @@ public class InmueblesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Create([Bind("PropietarioId,TipoId,Direccion,CupoMaximo,Coordenadas,PrecioPorDia,MonedaPrecio,ImagenPortada,Disponible")] Inmueble inmueble)
+    public IActionResult Create([Bind("PropietarioId,TipoId,Direccion,CupoMaximo,Coordenadas,PrecioPorDia,MonedaPrecio,PorcentajeReserva,ImagenPortada,Disponible")] Inmueble inmueble)
     {
         Normalizar(inmueble);
         if (!ModelState.IsValid)
@@ -82,7 +84,7 @@ public class InmueblesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(int id, [Bind("Id,PropietarioId,TipoId,Direccion,CupoMaximo,Coordenadas,PrecioPorDia,MonedaPrecio,ImagenPortada,Disponible")] Inmueble inmueble)
+    public IActionResult Edit(int id, [Bind("Id,PropietarioId,TipoId,Direccion,CupoMaximo,Coordenadas,PrecioPorDia,MonedaPrecio,PorcentajeReserva,ImagenPortada,Disponible")] Inmueble inmueble)
     {
         if (id != inmueble.Id)
         {
@@ -101,6 +103,23 @@ public class InmueblesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult ToggleDisponible(int id)
+    {
+        var inmueble = repositorio.ObtenerPorId(id);
+        if (inmueble == null)
+        {
+            return NotFound();
+        }
+
+        var nuevoEstado = !inmueble.Disponible;
+        repositorio.CambiarDisponibilidad(id, nuevoEstado);
+        TempData["Mensaje"] = nuevoEstado ? "La oferta del inmueble fue reanudada." : "La oferta del inmueble fue suspendida temporalmente.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Roles = "Administrador")]
     public IActionResult Delete(int id)
     {
         var inmueble = repositorio.ObtenerPorId(id);
@@ -109,6 +128,7 @@ public class InmueblesController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Administrador")]
     public IActionResult DeleteConfirmed(int id)
     {
         try

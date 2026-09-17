@@ -1,0 +1,52 @@
+﻿@model Pago
+@{
+    ViewData["Title"] = "Editar Concepto de Pago #" + Model.Id;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h1 class="h4 mb-0">Editar Concepto de Pago #@Model.Id</h1>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning py-2 small mb-3">
+                    <i class="fa-solid fa-circle-info me-1"></i> Por normativa de auditoría, <strong>solo se permite editar el concepto del pago</strong>. El monto y la fecha no pueden ser alterados.
+                </div>
+
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Reserva</label>
+                        <input type="text" class="form-control" value="Reserva #@Model.ReservaId - @Model.InmuebleDireccion" readonly disabled />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Fecha de Pago</label>
+                            <input type="text" class="form-control" value="@Model.FechaPago.ToString("dd/MM/yyyy HH:mm")" readonly disabled />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Importe</label>
+                            <input type="text" class="form-control fw-bold text-success" value="@Model.MonedaPrecio @Model.Importe.ToString("N2")" readonly disabled />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Concepto" class="form-label fw-semibold"></label>
+                        <input asp-for="Concepto" class="form-control" />
+                        <span asp-validation-for="Concepto" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a class="btn btn-outline-secondary" asp-action="PorReserva" asp-route-reservaId="@Model.ReservaId">Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save me-1"></i> Guardar Concepto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

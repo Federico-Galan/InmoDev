@@ -1,0 +1,135 @@
+﻿@model Reserva
+@{
+    ViewData["Title"] = "Detalle de Reserva #" + Model.Id;
+    var esAdmin = User.IsInRole("Administrador");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h3 mb-0">Reserva #@Model.Id</h1>
+        <span class="badge @(Model.Estado == "Vigente" ? "bg-success" : Model.Estado == "Finalizada" ? "bg-secondary" : "bg-danger") fs-6 mt-1">
+            @Model.Estado
+        </span>
+    </div>
+    <div class="btn-group">
+        <a class="btn btn-success" asp-controller="Pagos" asp-action="PorReserva" asp-route-reservaId="@Model.Id">
+            <i class="fa-solid fa-money-bill-wave me-1"></i> Pagos (@Model.MonedaPrecio @Model.TotalPagado.ToString("N2"))
+        </a>
+        @if (Model.Estado == "Vigente")
+        {
+            <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen me-1"></i> Editar</a>
+        }
+        <a class="btn btn-secondary" asp-action="Index">Volver</a>
+    </div>
+</div>
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-info">@ViewBag.Mensaje</div>
+}
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0"><i class="fa-solid fa-building me-2 text-primary"></i>Inmueble y Propietario</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Inmueble:</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.InmuebleDireccion</dd>
+
+                    <dt class="col-sm-4">Propietario:</dt>
+                    <dd class="col-sm-8">@Model.PropietarioNombre</dd>
+
+                    <dt class="col-sm-4">Precio diario:</dt>
+                    <dd class="col-sm-8">@Model.MonedaPrecio @Model.MontoPorDia.ToString("N2")</dd>
+
+                    <dt class="col-sm-4">% Seña fija:</dt>
+                    <dd class="col-sm-8">@(Model.PorcentajeSena.HasValue ? $"{Model.PorcentajeSena}%" : "No especificado")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="card-title mb-0"><i class="fa-solid fa-user me-2 text-primary"></i>Inquilino y Contrato</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Inquilino:</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.InquilinoNombre</dd>
+
+                    <dt class="col-sm-4">DNI Inquilino:</dt>
+                    <dd class="col-sm-8">@Model.InquilinoDni</dd>
+
+                    <dt class="col-sm-4">Período pactado:</dt>
+                    <dd class="col-sm-8">@Model.FechaInicio.ToString("dd/MM/yyyy") al @Model.FechaFin.ToString("dd/MM/yyyy") (@Model.CantidadDias días)</dd>
+
+                    @if (Model.FechaFinReal.HasValue)
+                    {
+                        <dt class="col-sm-4 text-warning">Fin efectiva:</dt>
+                        <dd class="col-sm-8 text-warning fw-semibold">@Model.FechaFinReal.Value.ToString("dd/MM/yyyy")</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado Económico -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="card-title mb-0"><i class="fa-solid fa-scale-balanced me-2 text-success"></i>Estado de Pagos y Cuentas</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3 mb-2">
+                <div class="text-muted small">Total del Contrato</div>
+                <div class="h4 fw-bold mb-0">@Model.MonedaPrecio @Model.MontoTotalEstimado.ToString("N2")</div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="text-muted small">Seña Requerida</div>
+                <div class="h4 fw-bold text-info mb-0">@Model.MonedaPrecio @Model.MontoSenaRequerido.ToString("N2")</div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="text-muted small">Total Abonado</div>
+                <div class="h4 fw-bold text-success mb-0">@Model.MonedaPrecio @Model.TotalPagado.ToString("N2")</div>
+            </div>
+            <div class="col-md-3 mb-2">
+                <div class="text-muted small">Saldo Pendiente</div>
+                <div class="h4 fw-bold @(Model.SaldoPendiente > 0 ? "text-danger" : "text-success") mb-0">
+                    @Model.MonedaPrecio @Model.SaldoPendiente.ToString("N2")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (esAdmin)
+{
+    <!-- Sección Exclusiva para Administradores: Auditoría -->
+    <div class="card border-info shadow-sm mb-4">
+        <div class="card-header bg-info bg-opacity-10 py-2">
+            <h6 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-user-shield me-2 text-info"></i>Información de Auditoría (Solo Administradores)</h6>
+        </div>
+        <div class="card-body py-3">
+            <div class="row small">
+                <div class="col-md-6">
+                    <strong>Fecha de Creación:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm:ss")<br />
+                    <strong>Usuario Creador:</strong> @(string.IsNullOrWhiteSpace(Model.UsuarioCreadorNombre) ? $"ID #{Model.UsuarioCreadoId}" : Model.UsuarioCreadorNombre)
+                </div>
+                <div class="col-md-6">
+                    <strong>Fecha de Finalización:</strong> @(Model.FechaFinalizacion.HasValue ? Model.FechaFinalizacion.Value.ToString("dd/MM/yyyy HH:mm:ss") : "No finalizada")<br />
+                    <strong>Usuario Finalizador:</strong> @(string.IsNullOrWhiteSpace(Model.UsuarioFinalizaNombre) ? (Model.UsuarioFinalizaId.HasValue ? $"ID #{Model.UsuarioFinalizaId}" : "N/A") : Model.UsuarioFinalizaNombre)<br />
+                    @if (Model.MultaAplicada.HasValue && Model.MultaAplicada > 0)
+                    {
+                        <strong class="text-danger">Multa por terminación anticipada:</strong> <span>@Model.MonedaPrecio @Model.MultaAplicada.Value.ToString("N2")</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

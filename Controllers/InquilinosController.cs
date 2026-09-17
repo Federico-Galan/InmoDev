@@ -1,9 +1,11 @@
 using InmoDev.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 
 namespace InmoDev.Controllers;
 
+[Authorize]
 public class InquilinosController : Controller
 {
     private readonly IRepositorio<Inquilino> repositorio;
@@ -111,6 +113,7 @@ public class InquilinosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Administrador")]
     public IActionResult Delete(int id)
     {
         var inquilino = repositorio.ObtenerPorId(id);
@@ -119,6 +122,7 @@ public class InquilinosController : Controller
 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Administrador")]
     public IActionResult DeleteConfirmed(int id)
     {
         repositorio.Baja(id);

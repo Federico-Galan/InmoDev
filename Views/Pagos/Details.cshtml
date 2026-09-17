@@ -1,0 +1,72 @@
+﻿@model Pago
+@{
+    ViewData["Title"] = "Detalle del Pago #" + Model.Id;
+    var esAdmin = User.IsInRole("Administrador");
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0">Detalle del Pago #@Model.Id</h1>
+                <span class="badge @(Model.Estado == "Activo" ? "bg-success" : "bg-danger") fs-6">@Model.Estado</span>
+            </div>
+            <div class="card-body p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Reserva Asociada:</dt>
+                    <dd class="col-sm-8">
+                        <a asp-controller="Reservas" asp-action="Details" asp-route-id="@Model.ReservaId" class="fw-semibold">
+                            Reserva #@Model.ReservaId
+                        </a>
+                    </dd>
+
+                    <dt class="col-sm-4">Inmueble:</dt>
+                    <dd class="col-sm-8">@Model.InmuebleDireccion</dd>
+
+                    <dt class="col-sm-4">Inquilino:</dt>
+                    <dd class="col-sm-8">@Model.InquilinoNombre</dd>
+
+                    <dt class="col-sm-4">Concepto:</dt>
+                    <dd class="col-sm-8 fw-semibold">@Model.Concepto</dd>
+
+                    <dt class="col-sm-4">Fecha de Pago:</dt>
+                    <dd class="col-sm-8">@Model.FechaPago.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                    <dt class="col-sm-4">Importe:</dt>
+                    <dd class="col-sm-8 fw-bold fs-5 @(Model.Estado == "Anulado" ? "text-decoration-line-through text-danger" : "text-success")">
+                        @Model.MonedaPrecio @Model.Importe.ToString("N2")
+                    </dd>
+                </dl>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between">
+                <a class="btn btn-secondary" asp-action="PorReserva" asp-route-reservaId="@Model.ReservaId">Volver a Pagos</a>
+                @if (Model.Estado == "Activo")
+                {
+                    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id"><i class="fa-solid fa-pen me-1"></i> Editar Concepto</a>
+                }
+            </div>
+        </div>
+
+        @if (esAdmin)
+        {
+            <!-- Auditoría exclusiva para Administradores -->
+            <div class="card border-info shadow-sm">
+                <div class="card-header bg-info bg-opacity-10 py-2">
+                    <h6 class="mb-0 fw-bold"><i class="fa-solid fa-user-shield me-2 text-info"></i>Auditoría del Pago (Solo Administradores)</h6>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row small">
+                        <div class="col-md-6">
+                            <strong>Fecha de Registro:</strong> @Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm:ss")<br />
+                            <strong>Usuario Creador:</strong> @(string.IsNullOrWhiteSpace(Model.UsuarioCreaNombre) ? $"ID #{Model.UsuarioCreaId}" : Model.UsuarioCreaNombre)
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha de Anulación:</strong> @(Model.FechaAnulacion.HasValue ? Model.FechaAnulacion.Value.ToString("dd/MM/yyyy HH:mm:ss") : "No anulado")<br />
+                            <strong>Usuario Anulador:</strong> @(string.IsNullOrWhiteSpace(Model.UsuarioAnulaNombre) ? (Model.UsuarioAnulaId.HasValue ? $"ID #{Model.UsuarioAnulaId}" : "N/A") : Model.UsuarioAnulaNombre)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

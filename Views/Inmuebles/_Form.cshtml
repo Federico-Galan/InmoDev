@@ -22,15 +22,15 @@
     <span asp-validation-for="Direccion" class="text-danger"></span>
 </div>
 <div class="row">
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
         <label asp-for="CupoMaximo" class="form-label"></label>
         <input asp-for="CupoMaximo" class="form-control" min="1" />
         <span asp-validation-for="CupoMaximo" class="text-danger"></span>
     </div>
-    <div class="col-md-6 mb-3">
+    <div class="col-md-4 mb-3">
         <label asp-for="PrecioPorDia" class="form-label"></label>
         <div class="input-group">
-            <select asp-for="MonedaPrecio" class="form-select moneda-precio-select">
+            <select asp-for="MonedaPrecio" class="form-select moneda-precio-select" style="max-width: 90px;">
                 <option value="ARS">ARS</option>
                 <option value="USD">USD</option>
             </select>
@@ -38,6 +38,14 @@
         </div>
         <span asp-validation-for="MonedaPrecio" class="text-danger"></span>
         <span asp-validation-for="PrecioPorDia" class="text-danger"></span>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label asp-for="PorcentajeReserva" class="form-label"></label>
+        <div class="input-group">
+            <input asp-for="PorcentajeReserva" class="form-control" min="0" max="100" step="1" />
+            <span class="input-group-text">%</span>
+        </div>
+        <span asp-validation-for="PorcentajeReserva" class="text-danger"></span>
     </div>
 </div>
 <div class="mb-3">
