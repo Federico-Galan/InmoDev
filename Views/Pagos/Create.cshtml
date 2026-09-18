@@ -16,6 +16,7 @@
 
                     <div class="mb-3">
                         <label asp-for="ReservaId" class="form-label fw-semibold"></label>
+                        <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar reserva por N°, dirección o inquilino... (mínimo 3 caracteres)" data-target="ReservaId" data-url="/Pagos/BuscarReservas" />
                         <select asp-for="ReservaId" class="form-select" asp-items="ViewBag.Reservas">
                             <option value="0">-- Seleccione una reserva --</option>
                         </select>

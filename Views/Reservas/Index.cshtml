@@ -125,8 +125,17 @@
                             </a>
                             @if (item.Estado == "Vigente")
                             {
+                                <a class="btn btn-sm btn-outline-warning text-dark" asp-action="TerminarAnticipada" asp-route-id="@item.Id" title="Terminar anticipadamente">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </a>
                                 <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.Id" title="Editar">
                                     <i class="fa-solid fa-pen"></i>
+                                </a>
+                            }
+                            @if (item.Estado == "Vigente" || item.Estado == "Finalizada")
+                            {
+                                <a class="btn btn-sm btn-outline-info text-dark" asp-action="Renovar" asp-route-id="@item.Id" title="Renovar / Extender">
+                                    <i class="fa-solid fa-arrows-rotate"></i>
                                 </a>
                             }
                             @if (User.IsInRole("Administrador"))

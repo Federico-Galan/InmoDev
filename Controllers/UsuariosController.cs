@@ -194,7 +194,7 @@ public class UsuariosController : Controller
                 ModelState.AddModelError("FotoAvatar", validacion);
                 return View(model);
             }
-            nuevoAvatar = await GuardarAvatarAsync(usuario.Id, model.FotoAvatar);
+            nuevoAvatar = await GuardarAvatarAsync(usuario.Id, model.FotoAvatar, usuario.Avatar);
         }
 
         repositorio.ActualizarPerfil(usuario.Id, model.Nombre.Trim(), nuevoAvatar);
@@ -336,7 +336,8 @@ public class UsuariosController : Controller
 
         if (model.FotoAvatar != null && model.FotoAvatar.Length > 0)
         {
-            usuario.Avatar = await GuardarAvatarAsync(id, model.FotoAvatar);
+            var avatarAnterior = usuario.Avatar;
+            usuario.Avatar = await GuardarAvatarAsync(id, model.FotoAvatar, avatarAnterior);
         }
 
         repositorio.Modificacion(usuario);
@@ -396,7 +397,7 @@ public class UsuariosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task<string> GuardarAvatarAsync(int usuarioId, IFormFile avatar)
+    private async Task<string> GuardarAvatarAsync(int usuarioId, IFormFile avatar, string? avatarAnterior = null)
     {
         var extension = Path.GetExtension(avatar.FileName).ToLowerInvariant();
         var nombreArchivo = $"avatar_{usuarioId}_{Guid.NewGuid():N}{extension}";
@@ -406,6 +407,25 @@ public class UsuariosController : Controller
 
         await using var stream = System.IO.File.Create(ruta);
         await avatar.CopyToAsync(stream);
+
+        // Doc 19: si el usuario ya tenia un avatar previo, el archivo anterior se elimina
+        // del disco para evitar acumulacion de huerfanos.
+        if (!string.IsNullOrWhiteSpace(avatarAnterior)
+            && avatarAnterior.StartsWith("/uploads/avatars/", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var rutaAnterior = Path.Combine(environment.WebRootPath, avatarAnterior.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+                if (System.IO.File.Exists(rutaAnterior))
+                {
+                    System.IO.File.Delete(rutaAnterior);
+                }
+            }
+            catch (IOException ex)
+            {
+                logger.LogWarning(ex, "No se pudo eliminar el avatar anterior {Avatar}", avatarAnterior);
+            }
+        }
 
         return $"/uploads/avatars/{nombreArchivo}";
     }

@@ -13,17 +13,20 @@ public class ReservasController : Controller
     private readonly RepositorioReserva repositorio;
     private readonly RepositorioInmueble repositorioInmueble;
     private readonly RepositorioTipoInmueble repositorioTipo;
+    private readonly RepositorioPago repositorioPago;
     private readonly ILogger<ReservasController> logger;
 
     public ReservasController(
         RepositorioReserva repositorio,
         RepositorioInmueble repositorioInmueble,
         RepositorioTipoInmueble repositorioTipo,
+        RepositorioPago repositorioPago,
         ILogger<ReservasController> logger)
     {
         this.repositorio = repositorio;
         this.repositorioInmueble = repositorioInmueble;
         this.repositorioTipo = repositorioTipo;
+        this.repositorioPago = repositorioPago;
         this.logger = logger;
     }
 
@@ -145,6 +148,52 @@ public class ReservasController : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
+    [HttpGet]
+    public IActionResult Renovar(int id)
+    {
+        var original = repositorio.ObtenerPorId(id);
+        if (original == null)
+        {
+            return NotFound();
+        }
+
+        if (original.Estado == "Cancelada" || original.Estado == "Anulada")
+        {
+            TempData["Mensaje"] = $"No se puede renovar una reserva en estado {original.Estado}.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // Regla: Nueva fecha de inicio contigua al fin pactado (+1 día)
+        var nuevaFechaInicio = original.FechaFin.Date.AddDays(1);
+        int diasDuracion = original.CantidadDias;
+        var nuevaFechaFin = nuevaFechaInicio.AddDays(diasDuracion - 1);
+
+        // Se consultan los valores actuales del inmueble
+        var inmueble = repositorioInmueble.ObtenerPorId(original.InmuebleId);
+
+        var nuevaReserva = new Reserva
+        {
+            InquilinoId = original.InquilinoId,
+            InmuebleId = original.InmuebleId,
+            FechaInicio = nuevaFechaInicio,
+            FechaFin = nuevaFechaFin,
+            MontoPorDia = inmueble?.PrecioPorDia ?? original.MontoPorDia,
+            PorcentajeSena = inmueble?.PorcentajeReserva ?? original.PorcentajeSena,
+            MonedaPrecio = inmueble?.MonedaPrecio ?? original.MonedaPrecio
+        };
+
+        if (repositorio.InmuebleEstaOcupado(nuevaReserva.InmuebleId, nuevaReserva.FechaInicio, nuevaReserva.FechaFin))
+        {
+            ViewBag.AdvertenciaSolapamiento = "Aviso: El inmueble se encuentra ocupado en las fechas contiguas sugeridas. Por favor seleccione un rango disponible.";
+        }
+
+        ViewBag.EsRenovacion = true;
+        ViewBag.ReservaOriginalId = id;
+        CargarCombos(nuevaReserva);
+
+        return View("Create", nuevaReserva);
+    }
+
     public IActionResult Edit(int id)
     {
         var reserva = repositorio.ObtenerPorId(id);
@@ -204,6 +253,107 @@ public class ReservasController : Controller
 
         repositorio.Modificacion(original);
         TempData["Mensaje"] = "Reserva actualizada correctamente.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpGet]
+    public IActionResult TerminarAnticipada(int id)
+    {
+        var reserva = repositorio.ObtenerPorId(id);
+        if (reserva == null)
+        {
+            return NotFound();
+        }
+
+        if (reserva.Estado != "Vigente")
+        {
+            TempData["Mensaje"] = $"Solo se pueden terminar anticipadamente reservas vigentes (estado actual: {reserva.Estado}).";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var hoy = DateTime.Today;
+        var fechaPropuesta = (hoy >= reserva.FechaInicio && hoy < reserva.FechaFin)
+            ? hoy
+            : reserva.FechaInicio;
+
+        ViewBag.FechaFinRealPropuesta = fechaPropuesta;
+        return View(reserva);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult TerminarAnticipada(int id, DateTime fechaFinReal)
+    {
+        var reserva = repositorio.ObtenerPorId(id);
+        if (reserva == null)
+        {
+            return NotFound();
+        }
+
+        if (reserva.Estado != "Vigente")
+        {
+            TempData["Mensaje"] = "Solo se pueden terminar anticipadamente reservas en estado Vigente.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        if (fechaFinReal.Date < reserva.FechaInicio.Date)
+        {
+            ModelState.AddModelError("fechaFinReal", "La fecha de terminación efectiva no puede ser anterior a la fecha de inicio de la reserva.");
+        }
+
+        if (fechaFinReal.Date >= reserva.FechaFin.Date)
+        {
+            ModelState.AddModelError("fechaFinReal", "La fecha de terminación anticipada debe ser estrictamente anterior a la fecha pactada original.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            ViewBag.FechaFinRealPropuesta = fechaFinReal;
+            return View(reserva);
+        }
+
+        // Lógica de cálculo de multa:
+        // Días totales originales
+        int diasOriginales = (reserva.FechaFin.Date - reserva.FechaInicio.Date).Days + 1;
+        // Días efectivamente cumplidos
+        int diasCumplidos = (fechaFinReal.Date - reserva.FechaInicio.Date).Days + 1;
+        // Días restantes que no se van a utilizar
+        int diasRestantes = diasOriginales - diasCumplidos;
+        // Monto restante pactado no utilizado
+        decimal montoRestante = diasRestantes * reserva.MontoPorDia;
+
+        // Porcentaje de tiempo cumplido
+        double porcentajeCumplido = (double)diasCumplidos / diasOriginales;
+
+        // Regla de negocio:
+        // Si se cumplió menos del 50% -> Multa = 50% del monto total restante
+        // Si se cumplió el 50% o más -> Multa = 25% del monto total restante
+        decimal porcentajeMulta = (porcentajeCumplido < 0.50) ? 0.50m : 0.25m;
+        decimal multa = Math.Round(montoRestante * porcentajeMulta, 2);
+
+        // Usuario autenticado que ejecuta la acción
+        var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var usuarioId = int.TryParse(idClaim, out var uId) ? uId : 1;
+
+        // 1. Actualizar reserva (conserva FechaFin original, impacta FechaFinReal, MultaAplicada, Estado 'Finalizada', Auditoría)
+        repositorio.TerminarAnticipada(id, fechaFinReal, multa, usuarioId);
+
+        // 2. Impactar automáticamente el pago de la multa (condición de cierre: acreditada en el acto)
+        if (multa > 0)
+        {
+            var pagoMulta = new Pago
+            {
+                ReservaId = id,
+                Concepto = $"Multa por terminación anticipada ({(porcentajeMulta * 100):0}% sobre {diasRestantes} días restantes no gozados)",
+                FechaPago = DateTime.Now,
+                Importe = multa,
+                Estado = "Activo",
+                UsuarioCreaId = usuarioId
+            };
+            repositorioPago.Alta(pagoMulta);
+        }
+
+        TempData["Mensaje"] = $"Reserva #{id} finalizada anticipadamente con éxito. Se registró y acreditó la multa por {reserva.MonedaPrecio} {multa:N2} ({(porcentajeMulta * 100):0}%).";
         return RedirectToAction(nameof(Details), new { id });
     }
 

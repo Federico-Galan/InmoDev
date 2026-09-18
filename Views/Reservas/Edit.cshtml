@@ -19,12 +19,14 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="InquilinoId" class="form-label fw-semibold"></label>
+                            <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar inquilino por nombre o DNI... (mínimo 3 caracteres)" data-target="InquilinoId" data-url="/Reservas/BuscarInquilinos" />
                             <select asp-for="InquilinoId" class="form-select" asp-items="ViewBag.Inquilinos"></select>
                             <span asp-validation-for="InquilinoId" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label asp-for="InmuebleId" class="form-label fw-semibold"></label>
+                            <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar inmueble por dirección... (mínimo 3 caracteres)" data-target="InmuebleId" data-url="/Reservas/BuscarInmuebles" />
                             <select asp-for="InmuebleId" class="form-select" asp-items="ViewBag.Inmuebles"></select>
                             <span asp-validation-for="InmuebleId" class="text-danger small"></span>
                         </div>

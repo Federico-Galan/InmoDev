@@ -1,0 +1,196 @@
+@{
+    ViewData["Title"] = "Módulo de Informes y Reportes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-dark"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Centro de Informes y Estadísticas</h1>
+        <p class="text-muted mb-0">Consulte reportes consolidados y análisis operativos del sistema inmobiliario.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Reporte 1 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                        <i class="fa-solid fa-building-user fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary mb-1">Reporte #1</span>
+                        <h5 class="card-title mb-0">Inmuebles y Dueños</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Listado integral de inmuebles con datos de contacto de sus propietarios y filtro por estado de disponibilidad.
+                </p>
+                <a asp-action="Reporte1" class="btn btn-outline-primary w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 2 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-info">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info bg-opacity-10 text-info rounded p-3 me-3">
+                        <i class="fa-solid fa-user-tag fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-info-subtle text-info mb-1">Reporte #2</span>
+                        <h5 class="card-title mb-0">Por Propietario</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Filtre y visualice todos los inmuebles pertenecientes a un propietario específico.
+                </p>
+                <a asp-action="Reporte2" class="btn btn-outline-info w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 3 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-warning">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded p-3 me-3">
+                        <i class="fa-solid fa-ranking-star fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning-subtle text-dark mb-1">Reporte #3</span>
+                        <h5 class="card-title mb-0">Ranking Más Reservados</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Top de inmuebles con mayor cantidad de reservas y días ocupados en los últimos 365 días.
+                </p>
+                <a asp-action="Reporte3" class="btn btn-outline-warning text-dark w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 4 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-secondary">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-secondary bg-opacity-10 text-secondary rounded p-3 me-3">
+                        <i class="fa-solid fa-bed fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary-subtle text-secondary mb-1">Reporte #4</span>
+                        <h5 class="card-title mb-0">Sin Reservas Recientes</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Inmuebles sin actividad contractual en los últimos X días (30, 60, 90, 180 o 365 días).
+                </p>
+                <a asp-action="Reporte4" class="btn btn-outline-secondary w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 5 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-success">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success bg-opacity-10 text-success rounded p-3 me-3">
+                        <i class="fa-solid fa-calendar-check fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-success-subtle text-success mb-1">Reporte #5</span>
+                        <h5 class="card-title mb-0">Reservas Vigentes</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Listado de todas las reservas de alquiler activas con filtro por rango de fechas de ocupación.
+                </p>
+                <a asp-action="Reporte5" class="btn btn-outline-success w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 6 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-danger">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-danger bg-opacity-10 text-danger rounded p-3 me-3">
+                        <i class="fa-solid fa-hourglass-half fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-danger-subtle text-danger mb-1">Reporte #6</span>
+                        <h5 class="card-title mb-0">Próximas a Vencer</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Reservas vigentes que finalizan dentro de los próximos días, con opción rápida de renovación.
+                </p>
+                <a asp-action="Reporte6" class="btn btn-outline-danger w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 7 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-dark">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-dark bg-opacity-10 text-dark rounded p-3 me-3">
+                        <i class="fa-solid fa-receipt fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-dark-subtle text-dark mb-1">Reporte #7</span>
+                        <h5 class="card-title mb-0">Pagos por Reserva</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Historial de pagos acreditados y anulados por reserva con botón directo para nuevo cobro.
+                </p>
+                <a asp-action="Reporte7" class="btn btn-outline-dark w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reporte 8 -->
+    <div class="col-md-6 col-xl-3">
+        <div class="card h-100 shadow-sm border-0 border-top border-4 border-primary">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded p-3 me-3">
+                        <i class="fa-solid fa-magnifying-glass-location fs-4"></i>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary mb-1">Reporte #8</span>
+                        <h5 class="card-title mb-0">Consulta Disponibilidad</h5>
+                    </div>
+                </div>
+                <p class="card-text text-muted small flex-grow-1">
+                    Dadas dos fechas (inicio y fin), liste todos los inmuebles libres y listos para alquilar.
+                </p>
+                <a asp-action="Reporte8" class="btn btn-outline-primary w-100 mt-auto">
+                    <i class="fa-solid fa-arrow-right me-1"></i> Consultar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

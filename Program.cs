@@ -16,6 +16,7 @@ builder.Services.AddScoped<RepositorioImagen>();
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<RepositorioReserva>();
 builder.Services.AddScoped<RepositorioPago>();
+builder.Services.AddScoped<RepositorioInforme>();
 builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

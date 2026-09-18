@@ -1,0 +1,197 @@
+@model IEnumerable<Pago>
+@{
+    ViewData["Title"] = "Reporte 7: Pagos por Reserva";
+    int? reservaId = ViewBag.ReservaId;
+    Reserva? reserva = ViewBag.Reserva as Reserva;
+    var esAdmin = User.IsInRole("Administrador");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index">Informes</a></li>
+                <li class="breadcrumb-item active">Reporte 7</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 text-dark"><i class="fa-solid fa-receipt me-2 text-dark"></i>Detalle de Pagos por Reserva</h1>
+        <p class="text-muted mb-0">Auditoría detallada de pagos acreditados y anulados, con acceso directo para registrar cobros.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a Informes
+    </a>
+</div>
+
+<!-- Selector de Reserva -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-7 col-lg-6">
+                <label for="reservaId" class="form-label fw-semibold">Seleccione una Reserva:</label>
+                <select name="reservaId" id="reservaId" class="form-select" asp-items="ViewBag.Reservas">
+                    <option value="">-- Elija una reserva para auditar sus pagos --</option>
+                </select>
+            </div>
+            <div class="col-md-5 d-flex gap-2">
+                <button type="submit" class="btn btn-dark">
+                    <i class="fa-solid fa-search me-1"></i> Consultar Pagos
+                </button>
+                <a asp-action="Reporte7" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reiniciar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (!reservaId.HasValue || reserva == null)
+{
+    <div class="card shadow-sm border-0 py-5 text-center text-muted">
+        <div class="card-body">
+            <i class="fa-solid fa-receipt fs-1 text-secondary mb-3"></i>
+            <h5 class="fw-normal">Seleccione una reserva del desplegable para ver el desglose económico y la lista de pagos.</h5>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Ficha Económica de la Reserva Seleccionada -->
+    <div class="card shadow-sm border-0 mb-4 border-start border-4 border-primary">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="card-title fw-bold mb-1">
+                        Reserva #@reserva.Id &mdash; @reserva.InmuebleDireccion
+                    </h5>
+                    <span class="badge @(reserva.Estado == "Vigente" ? "bg-success" : reserva.Estado == "Finalizada" ? "bg-secondary" : "bg-danger") me-2">
+                        @reserva.Estado
+                    </span>
+                    <span class="text-muted small">Inquilino: <strong>@reserva.InquilinoNombre</strong> (DNI: @reserva.InquilinoDni)</span>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <a class="btn btn-success" asp-controller="Pagos" asp-action="Create" asp-route-reservaId="@reserva.Id">
+                        <i class="fa-solid fa-plus-circle me-1"></i> Cargar Nuevo Pago
+                    </a>
+                    <a class="btn btn-outline-secondary" asp-controller="Reservas" asp-action="Details" asp-route-id="@reserva.Id">
+                        <i class="fa-solid fa-eye me-1"></i> Ficha Reserva
+                    </a>
+                </div>
+            </div>
+
+            <div class="row text-center g-2 pt-2 border-top">
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Total Contratado</div>
+                    <div class="h5 fw-bold text-dark mb-0">@reserva.MonedaPrecio @reserva.MontoTotalEstimado.ToString("N2")</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Total Abonado Activo</div>
+                    <div class="h5 fw-bold text-success mb-0">@reserva.MonedaPrecio @reserva.TotalPagado.ToString("N2")</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Multa Aplicada</div>
+                    <div class="h5 fw-bold text-warning mb-0">
+                        @(reserva.MultaAplicada.HasValue ? $"{reserva.MonedaPrecio} {reserva.MultaAplicada.Value:N2}" : "Sin multa")
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-muted small">Saldo Pendiente</div>
+                    <div class="h5 fw-bold @(reserva.SaldoPendiente > 0 ? "text-danger" : "text-success") mb-0">
+                        @reserva.MonedaPrecio @reserva.SaldoPendiente.ToString("N2")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Pagos de la Reserva -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0"><i class="fa-solid fa-list-check me-2 text-dark"></i>Historial de Pagos de la Reserva</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>N° Pago</th>
+                        <th>Fecha de Pago</th>
+                        <th>Concepto</th>
+                        <th>Importe</th>
+                        <th>Estado</th>
+                        <th>Registrado por</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fa-regular fa-folder-open fs-3 d-block mb-2"></i>
+                                No se registran pagos para esta reserva todavía.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr class="@(item.Estado == "Anulado" ? "table-danger bg-opacity-25" : "")">
+                            <td>
+                                <span class="fw-bold">#@item.Id</span>
+                            </td>
+                            <td>
+                                @item.FechaPago.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td>
+                                <div class="fw-medium">@item.Concepto</div>
+                            </td>
+                            <td>
+                                <span class="fw-bold @(item.Estado == "Anulado" ? "text-decoration-line-through text-danger" : "text-success")">
+                                    @item.MonedaPrecio @item.Importe.ToString("N2")
+                                </span>
+                            </td>
+                            <td>
+                                @if (item.Estado == "Activo")
+                                {
+                                    <span class="badge bg-success">Activo</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Anulado</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="small">@(string.IsNullOrWhiteSpace(item.UsuarioCreaNombre) ? $"Usuario #{item.UsuarioCreaId}" : item.UsuarioCreaNombre)</span>
+                                @if (item.Estado == "Anulado")
+                                {
+                                    <div class="small text-danger">Anuló: @(string.IsNullOrWhiteSpace(item.UsuarioAnulaNombre) ? $"ID #{item.UsuarioAnulaId}" : item.UsuarioAnulaNombre)</div>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group">
+                                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Pagos" asp-action="Details" asp-route-id="@item.Id" title="Ver detalle">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    @if (item.Estado == "Activo")
+                                    {
+                                        <a class="btn btn-sm btn-outline-primary" asp-controller="Pagos" asp-action="Edit" asp-route-id="@item.Id" title="Editar Concepto">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        @if (esAdmin)
+                                        {
+                                            <form asp-controller="Pagos" asp-action="Anular" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('¿Confirma la anulación lógica del pago #@item.Id?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="returnUrl" value="@Url.Action("Reporte7", new { reservaId = item.ReservaId })" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Anular Pago">
+                                                    <i class="fa-solid fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

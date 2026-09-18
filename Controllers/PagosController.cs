@@ -201,6 +201,12 @@ public class PagosController : Controller
         return RedirectToAction(nameof(PorReserva), new { reservaId = pago.ReservaId });
     }
 
+    [HttpGet]
+    public IActionResult BuscarReservas(string? q)
+    {
+        return Json(repositorio.ObtenerReservasSelect(q));
+    }
+
     private void CargarCombos(Pago? pago = null)
     {
         ViewBag.Reservas = new SelectList(repositorio.ObtenerReservasSelect(), "Id", "Texto", pago?.ReservaId);

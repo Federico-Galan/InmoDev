@@ -67,6 +67,27 @@ public class RepositorioReserva : RepositorioBase, IRepositorio<Reserva>
         return command.ExecuteNonQuery();
     }
 
+    public int TerminarAnticipada(int id, DateTime fechaFinReal, decimal multa, int usuarioFinalizaId)
+    {
+        using var connection = new MySqlConnection(connectionString);
+        const string sql = """
+            UPDATE Reservas
+            SET FechaFinReal = @fechaFinReal,
+                MultaAplicada = @multaAplicada,
+                Estado = 'Finalizada',
+                UsuarioFinalizaId = @usuarioFinalizaId,
+                FechaFinalizacion = NOW()
+            WHERE Id = @id AND Estado = 'Vigente'
+            """;
+        using var command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@id", id);
+        command.Parameters.AddWithValue("@fechaFinReal", fechaFinReal.Date);
+        command.Parameters.AddWithValue("@multaAplicada", multa);
+        command.Parameters.AddWithValue("@usuarioFinalizaId", usuarioFinalizaId);
+        connection.Open();
+        return command.ExecuteNonQuery();
+    }
+
     public IList<Reserva> ObtenerLista(int pagina = 1, int tamPagina = 10)
     {
         return ObtenerLista(pagina, tamPagina, null, null, null, null, null);

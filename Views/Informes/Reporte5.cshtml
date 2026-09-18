@@ -1,0 +1,125 @@
+@model IEnumerable<Reserva>
+@{
+    ViewData["Title"] = "Reporte 5: Reservas Vigentes";
+    string? desde = ViewBag.Desde;
+    string? hasta = ViewBag.Hasta;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index">Informes</a></li>
+                <li class="breadcrumb-item active">Reporte 5</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 text-dark"><i class="fa-solid fa-calendar-check me-2 text-success"></i>Reservas de Alquiler Vigentes</h1>
+        <p class="text-muted mb-0">Contratos actualmente activos en el sistema, con filtro opcional por ventana temporal.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a Informes
+    </a>
+</div>
+
+<!-- Filtros de Fecha Server-Side -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="desde" class="form-label fw-semibold">Ocupadas a partir de:</label>
+                <input type="date" name="desde" id="desde" class="form-control" value="@desde" />
+            </div>
+            <div class="col-md-3">
+                <label for="hasta" class="form-label fw-semibold">Ocupadas hasta:</label>
+                <input type="date" name="hasta" id="hasta" class="form-control" value="@hasta" />
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-filter me-1"></i> Filtrar Período
+                </button>
+                <a asp-action="Reporte5" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Limpiar
+                </a>
+            </div>
+            <div class="col-md-3 text-md-end text-muted small">
+                Reservas vigentes: <span class="fw-bold text-dark">@Model.Count()</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Reserva</th>
+                    <th>Inquilino</th>
+                    <th>Inmueble</th>
+                    <th>Período Pactado</th>
+                    <th>Tarifa Diaria</th>
+                    <th>Total Contrato</th>
+                    <th>Pagado / Saldo</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            <i class="fa-regular fa-calendar-xmark fs-3 d-block mb-2"></i>
+                            No se encontraron reservas vigentes en el rango de fechas indicado.
+                        </td>
+                    </tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="badge bg-success fs-6">#@item.Id</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.InquilinoNombre</div>
+                            <small class="text-muted">DNI: @item.InquilinoDni</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.InmuebleDireccion</div>
+                            <small class="text-muted">Dueño: @item.PropietarioNombre</small>
+                        </td>
+                        <td>
+                            <div>@item.FechaInicio.ToString("dd/MM/yyyy") &rarr; @item.FechaFin.ToString("dd/MM/yyyy")</div>
+                            <span class="badge bg-light text-dark border">@item.CantidadDias días</span>
+                        </td>
+                        <td>
+                            @item.MonedaPrecio @item.MontoPorDia.ToString("N2")
+                        </td>
+                        <td>
+                            <div class="fw-bold">@item.MonedaPrecio @item.MontoTotalEstimado.ToString("N2")</div>
+                        </td>
+                        <td>
+                            <span class="text-success fw-semibold">@item.MonedaPrecio @item.TotalPagado.ToString("N2")</span>
+                            @if (item.SaldoPendiente > 0)
+                            {
+                                <div class="small text-danger">Saldo: @item.MonedaPrecio @item.SaldoPendiente.ToString("N2")</div>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group" role="group">
+                                <a class="btn btn-sm btn-outline-secondary" asp-controller="Reservas" asp-action="Details" asp-route-id="@item.Id" title="Ver detalle">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a class="btn btn-sm btn-outline-success" asp-controller="Pagos" asp-action="PorReserva" asp-route-reservaId="@item.Id" title="Ver pagos">
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                </a>
+                                <a class="btn btn-sm btn-outline-warning text-dark" asp-controller="Reservas" asp-action="TerminarAnticipada" asp-route-id="@item.Id" title="Terminar anticipadamente">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

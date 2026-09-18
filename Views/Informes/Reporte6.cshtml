@@ -1,0 +1,138 @@
+@model IEnumerable<Reserva>
+@{
+    ViewData["Title"] = "Reporte 6: Reservas Próximas a Vencer";
+    int dias = ViewBag.Dias ?? 30;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index">Informes</a></li>
+                <li class="breadcrumb-item active">Reporte 6</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 text-dark"><i class="fa-solid fa-hourglass-half me-2 text-danger"></i>Reservas Próximas a Vencer</h1>
+        <p class="text-muted mb-0">Anticípese a las finalizaciones de estadías para coordinar egresos o renovaciones con los inquilinos.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a Informes
+    </a>
+</div>
+
+<!-- Selector de Plazo -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5 col-lg-4">
+                <label for="dias" class="form-label fw-semibold">Finalizan dentro de los próximos:</label>
+                <select name="dias" id="dias" class="form-select" onchange="this.form.submit()">
+                    <option value="7" selected="@(dias == 7)">Próximos 7 días (1 semana)</option>
+                    <option value="15" selected="@(dias == 15)">Próximos 15 días (quincena)</option>
+                    <option value="30" selected="@(dias == 30)">Próximos 30 días (1 mes)</option>
+                    <option value="60" selected="@(dias == 60)">Próximos 60 días (2 meses)</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-filter me-1"></i> Consultar
+                </button>
+            </div>
+            <div class="col-md-3 text-md-end text-muted small">
+                Por vencer: <span class="fw-bold text-danger">@Model.Count()</span> reservas
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Reserva</th>
+                    <th>Inquilino</th>
+                    <th>Inmueble</th>
+                    <th>Fecha de Fin Pactada</th>
+                    <th class="text-center">Días Restantes</th>
+                    <th>Saldo Pendiente</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-regular fa-calendar-check fs-3 d-block text-success mb-2"></i>
+                            No hay reservas con vencimiento dentro de los próximos @dias días.
+                        </td>
+                    </tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="badge bg-danger fs-6">#@item.Id</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.InquilinoNombre</div>
+                            <small class="text-muted">DNI: @item.InquilinoDni</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.InmuebleDireccion</div>
+                            <small class="text-muted">Dueño: @item.PropietarioNombre</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">@item.FechaFin.ToString("dd/MM/yyyy")</div>
+                            <small class="text-muted">Inició: @item.FechaInicio.ToString("dd/MM/yyyy")</small>
+                        </td>
+                        <td class="text-center">
+                            @if (item.DiasRestantes <= 2)
+                            {
+                                <span class="badge bg-danger fs-6 px-3 shadow-sm">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>@item.DiasRestantes días
+                                </span>
+                            }
+                            else if (item.DiasRestantes <= 7)
+                            {
+                                <span class="badge bg-warning text-dark fs-6 px-3">
+                                    @item.DiasRestantes días
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary fs-6 px-3">
+                                    @item.DiasRestantes días
+                                </span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.SaldoPendiente > 0)
+                            {
+                                <span class="text-danger fw-bold">@item.MonedaPrecio @item.SaldoPendiente.ToString("N2")</span>
+                            }
+                            else
+                            {
+                                <span class="text-success small fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Al día</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group" role="group">
+                                <a class="btn btn-sm btn-info text-dark fw-semibold" asp-controller="Reservas" asp-action="Renovar" asp-route-id="@item.Id" title="Renovar / Extender">
+                                    <i class="fa-solid fa-arrows-rotate me-1"></i> Renovar
+                                </a>
+                                <a class="btn btn-sm btn-outline-secondary" asp-controller="Reservas" asp-action="Details" asp-route-id="@item.Id" title="Ver detalle">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a class="btn btn-sm btn-outline-success" asp-controller="Pagos" asp-action="PorReserva" asp-route-reservaId="@item.Id" title="Ver pagos">
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

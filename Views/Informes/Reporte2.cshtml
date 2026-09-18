@@ -1,0 +1,125 @@
+@model IEnumerable<Inmueble>
+@{
+    ViewData["Title"] = "Reporte 2: Inmuebles por Propietario";
+    int? propietarioId = ViewBag.PropietarioId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index">Informes</a></li>
+                <li class="breadcrumb-item active">Reporte 2</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 text-dark"><i class="fa-solid fa-user-tag me-2 text-info"></i>Inmuebles por Propietario Específico</h1>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver a Informes
+    </a>
+</div>
+
+<!-- Selector de Propietario -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6 col-lg-5">
+                <label for="propietarioId" class="form-label fw-semibold">Seleccione un Propietario:</label>
+                <select name="propietarioId" id="propietarioId" class="form-select" asp-items="ViewBag.Propietarios">
+                    <option value="">-- Seleccione un propietario para consultar sus propiedades --</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-info text-white">
+                    <i class="fa-solid fa-search me-1"></i> Ver Inmuebles
+                </button>
+                <a asp-action="Reporte2" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reiniciar
+                </a>
+            </div>
+            @if (propietarioId.HasValue)
+            {
+                <div class="col-md-2 text-md-end text-muted small">
+                    Inmuebles encontrados: <span class="fw-bold text-dark">@Model.Count()</span>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+@if (!propietarioId.HasValue)
+{
+    <div class="card shadow-sm border-0 py-5 text-center text-muted">
+        <div class="card-body">
+            <i class="fa-solid fa-arrow-up fs-1 text-info mb-3"></i>
+            <h5 class="fw-normal">Seleccione un propietario del menú desplegable superior para listar sus inmuebles.</h5>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Dirección</th>
+                        <th>Tipo</th>
+                        <th>Cupo Máximo</th>
+                        <th>Tarifa Diaria</th>
+                        <th>Porcentaje Seña</th>
+                        <th>Estado de Oferta</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                <i class="fa-regular fa-folder-open fs-3 d-block mb-2"></i>
+                                Este propietario no posee inmuebles registrados en el sistema.
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@item.Direccion</div>
+                                <small class="text-muted">Cód. #@item.Id</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@item.TipoNombre</span>
+                            </td>
+                            <td>
+                                @(item.CupoMaximo.HasValue ? $"{item.CupoMaximo} personas" : "Sin cupo")
+                            </td>
+                            <td>
+                                <span class="fw-bold">@item.MonedaPrecio @item.PrecioPorDia.ToString("N2")</span>
+                            </td>
+                            <td>
+                                @item.PorcentajeReserva%
+                            </td>
+                            <td>
+                                @if (item.Disponible)
+                                {
+                                    <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Disponible</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger"><i class="fa-solid fa-ban me-1"></i>Suspendido</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" asp-controller="Inmuebles" asp-action="Details" asp-route-id="@item.Id" title="Ver detalle">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

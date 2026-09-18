@@ -202,7 +202,7 @@ public class RepositorioPago : RepositorioBase, IRepositorio<Pago>
         return Convert.ToDecimal(command.ExecuteScalar());
     }
 
-    public IList<OpcionSelect> ObtenerReservasSelect(int limite = 30)
+    public IList<OpcionSelect> ObtenerReservasSelect(string? busqueda = null, int limite = 30)
     {
         var opciones = new List<OpcionSelect>();
         using var connection = new MySqlConnection(connectionString);
@@ -211,10 +211,15 @@ public class RepositorioPago : RepositorioBase, IRepositorio<Pago>
             FROM Reservas r
             INNER JOIN Inmueble im ON im.Id = r.InmuebleId
             INNER JOIN Inquilinos iq ON iq.Id = r.InquilinoId
+            WHERE (@busqueda IS NULL
+                   OR CAST(r.Id AS CHAR) LIKE CONCAT('%', @busqueda, '%')
+                   OR im.Direccion LIKE CONCAT('%', @busqueda, '%')
+                   OR iq.NombreCompleto LIKE CONCAT('%', @busqueda, '%'))
             ORDER BY r.Id DESC
             LIMIT @limite
             """;
         using var command = new MySqlCommand(sql, connection);
+        command.Parameters.AddWithValue("@busqueda", string.IsNullOrWhiteSpace(busqueda) ? DBNull.Value : busqueda.Trim());
         command.Parameters.AddWithValue("@limite", limite);
 
         connection.Open();

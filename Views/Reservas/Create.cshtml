@@ -1,23 +1,44 @@
 ﻿@model Reserva
 @{
-    ViewData["Title"] = "Nueva Reserva";
+    var esRenovacion = ViewBag.EsRenovacion == true;
+    ViewData["Title"] = esRenovacion ? $"Renovar Reserva #{ViewBag.ReservaOriginalId}" : "Nueva Reserva";
 }
 
 <div class="row justify-content-center">
     <div class="col-md-9 col-lg-8">
+        @if (esRenovacion)
+        {
+            <div class="alert alert-info shadow-sm d-flex align-items-center mb-3">
+                <i class="fa-solid fa-arrows-rotate fs-3 me-3 text-info"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">Renovación / Extensión de Reserva #@ViewBag.ReservaOriginalId</h6>
+                    <span class="small">Se han precargado el inquilino, el inmueble y las fechas inmediatamente contiguas al contrato anterior (+1 día). La reserva original se conserva intacta y se registrará un nuevo contrato.</span>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.AdvertenciaSolapamiento != null)
+        {
+            <div class="alert alert-warning shadow-sm mb-3">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>@ViewBag.AdvertenciaSolapamiento
+            </div>
+        }
+
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h1 class="h4 mb-0"><i class="fa-solid fa-calendar-plus text-primary me-2"></i>Nueva Reserva de Alquiler</h1>
+                <h1 class="h4 mb-0">
+                    <i class="fa-solid @(esRenovacion ? "fa-arrows-rotate text-info" : "fa-calendar-plus text-primary") me-2"></i>
+                    @(esRenovacion ? $"Renovar Reserva #{ViewBag.ReservaOriginalId}" : "Nueva Reserva de Alquiler")
+                </h1>
                 <a class="btn btn-sm btn-outline-info" asp-action="BuscarDisponibles"><i class="fa-solid fa-search me-1"></i> Consultar Disponibilidad</a>
             </div>
             <div class="card-body p-4">
                 <form asp-action="Create" method="post" id="formReserva">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
-
-                    <div class="row">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="InquilinoId" class="form-label fw-semibold"></label>
+                            <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar inquilino por nombre o DNI... (mínimo 3 caracteres)" data-target="InquilinoId" data-url="/Reservas/BuscarInquilinos" />
                             <select asp-for="InquilinoId" class="form-select" asp-items="ViewBag.Inquilinos">
                                 <option value="0">-- Seleccione un inquilino --</option>
                             </select>
@@ -26,6 +47,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label asp-for="InmuebleId" class="form-label fw-semibold"></label>
+                            <input type="search" class="form-control mb-2 js-select-busqueda" placeholder="Buscar inmueble por dirección... (mínimo 3 caracteres)" data-target="InmuebleId" data-url="/Reservas/BuscarInmuebles" />
                             <select asp-for="InmuebleId" class="form-select" asp-items="ViewBag.Inmuebles" id="selectInmueble">
                                 <option value="0">-- Seleccione un inmueble --</option>
                             </select>

@@ -54,6 +54,12 @@ public class Inmueble
     [Display(Name = "Propietario")]
     public string? PropietarioNombre { get; set; }
 
+    [Display(Name = "Telefono Propietario")]
+    public string? PropietarioTelefono { get; set; }
+
+    [Display(Name = "Email Propietario")]
+    public string? PropietarioEmail { get; set; }
+
     [Display(Name = "Tipo")]
     public string? TipoNombre { get; set; }
 }

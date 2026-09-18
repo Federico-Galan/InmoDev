@@ -85,6 +85,9 @@ public class Reserva : IValidatableObject
     [Display(Name = "Dias totales")]
     public int CantidadDias => Math.Max(1, (FechaFin.Date - FechaInicio.Date).Days + 1);
 
+    [Display(Name = "Dias restantes")]
+    public int DiasRestantes => Math.Max(0, (FechaFin.Date - DateTime.Today).Days);
+
     [Display(Name = "Monto total")]
     public decimal MontoTotalEstimado => CantidadDias * MontoPorDia;
 

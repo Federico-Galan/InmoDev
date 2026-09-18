@@ -120,6 +120,7 @@ document.querySelectorAll('.js-select-busqueda').forEach(input => {
             }
 
             const valorActual = select.value;
+            const textoBuscado = input.value.trim();
             const response = await fetch(url);
             if (!response.ok) {
                 return;
@@ -127,7 +128,22 @@ document.querySelectorAll('.js-select-busqueda').forEach(input => {
 
             const opciones = await response.json();
             const primeraOpcion = select.querySelector('option[value="0"]')?.textContent || 'Seleccione una opcion';
+            const seleccionado = Array.from(select.selectedOptions)
+                .filter(opcion => opcion.value !== '0')
+                .map(opcion => ({ id: opcion.value, texto: opcion.textContent }));
+            const yaIncluido = opciones.some(opcion => String(opcion.id) === valorActual);
+
             select.innerHTML = `<option value="0">${primeraOpcion}</option>`;
+
+            if (!yaIncluido && seleccionado.length > 0) {
+                seleccionado.forEach(opcion => {
+                    const option = document.createElement('option');
+                    option.value = opcion.id;
+                    option.textContent = opcion.texto;
+                    option.selected = true;
+                    select.appendChild(option);
+                });
+            }
 
             opciones.forEach(opcion => {
                 const option = document.createElement('option');
